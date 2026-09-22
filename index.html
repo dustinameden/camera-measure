@@ -3,77 +3,101 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
-<meta name="theme-color" content="#05070a">
-<title>Camera Measure</title>
+<meta name="theme-color" content="#0a0c0f">
+<title>Cut Measure</title>
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#05070a;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-button{font:inherit} #app{position:fixed;inset:0;overflow:hidden;background:#05070a}
-video,canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-canvas{touch-action:none}
-.scrim{position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(0,0,0,.42),transparent 22%,transparent 69%,rgba(0,0,0,.6))}
-.top{position:absolute;top:0;left:0;right:0;padding:calc(env(safe-area-inset-top) + 13px) 16px;display:flex;justify-content:space-between;align-items:center}
-.brand{font-weight:800;font-size:17px;text-shadow:0 2px 12px #000}.glass{border:1px solid rgba(255,255,255,.2);background:rgba(7,10,14,.6);backdrop-filter:blur(14px);color:#fff}
-.round{width:44px;height:44px;border-radius:50%;font-size:19px}
-.instruction{position:absolute;top:calc(env(safe-area-inset-top) + 78px);left:50%;transform:translateX(-50%);padding:9px 14px;border-radius:999px;background:rgba(5,7,10,.66);backdrop-filter:blur(12px);font-size:14px;font-weight:750;white-space:nowrap}
-.bottom{position:absolute;bottom:0;left:0;right:0;padding:12px 18px calc(env(safe-area-inset-bottom) + 18px);display:grid;grid-template-columns:54px 1fr 54px;align-items:center;gap:18px}
-.side{height:54px;border-radius:50%;font-size:21px}.plus{justify-self:center;width:78px;height:78px;border:5px solid white;border-radius:50%;background:rgba(255,255,255,.16);position:relative}
-.plus:after{content:"+";position:absolute;inset:5px;border-radius:50%;display:grid;place-items:center;background:white;color:#080a0d;font-size:36px}
-.status{position:absolute;bottom:calc(env(safe-area-inset-bottom) + 116px);left:50%;transform:translateX(-50%);padding:8px 13px;border-radius:999px;background:rgba(5,7,10,.68);backdrop-filter:blur(12px);font-size:13px;font-weight:700;white-space:nowrap}
-.cross{position:absolute;left:50%;top:50%;width:42px;height:42px;transform:translate(-50%,-50%);pointer-events:none;filter:drop-shadow(0 2px 4px #000)}
+html,body{margin:0;width:100%;height:100%;background:#0a0c0f;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+button,input,select{font:inherit}
+#app{min-height:100dvh;max-width:600px;margin:auto;background:#0a0c0f;position:relative;overflow:hidden}
+.screen{display:none;min-height:100dvh;padding-bottom:92px}.screen.active{display:block}
+header{height:64px;padding:calc(env(safe-area-inset-top) + 10px) 16px 8px;display:flex;align-items:center;justify-content:space-between}
+.brand{font-weight:900;letter-spacing:-.04em;font-size:19px}.jobname{font-size:12px;color:#9ba4b0}
+.camera{height:53dvh;min-height:390px;position:relative;background:radial-gradient(circle at 50% 40%,#202a35,#080a0d 70%);overflow:hidden}
+video,canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}canvas{touch-action:none}
+.scrim{position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(0,0,0,.35),transparent 25%,transparent 68%,rgba(0,0,0,.5))}
+.cross{position:absolute;left:50%;top:50%;width:42px;height:42px;transform:translate(-50%,-50%);filter:drop-shadow(0 2px 4px #000);pointer-events:none}
 .cross:before,.cross:after{content:"";position:absolute;background:#fff}.cross:before{width:2px;height:42px;left:20px}.cross:after{height:2px;width:42px;top:20px}.cross i{position:absolute;inset:14px;border:2px solid #fff;border-radius:50%}
-.sheet{position:absolute;z-index:10;left:10px;right:10px;bottom:calc(env(safe-area-inset-bottom) + 10px);padding:18px;border-radius:25px;background:rgba(19,23,30,.98);box-shadow:0 20px 70px #000;transform:translateY(120%);transition:.24s}
-.sheet.open{transform:translateY(0)}.handle{width:42px;height:5px;background:#59616d;border-radius:5px;margin:-6px auto 14px}.sheet h2{margin:0 0 7px}.sheet p{color:#bdc5cf;line-height:1.45;font-size:14px}
-.wide{width:100%;height:50px;border:0;border-radius:14px;margin-top:9px;background:#2c333d;color:white;font-weight:750}.primary{background:white;color:#080a0d}
-.card{width:min(250px,80%);aspect-ratio:1.586;border:2px dashed #84909f;border-radius:13px;margin:15px auto;display:grid;place-items:center;color:#aeb7c3;font-weight:750}
-#start{position:absolute;z-index:20;inset:0;display:grid;place-items:center;padding:26px;background:radial-gradient(circle at 50% 35%,#1a2634,#05070a 67%)}
-.start{max-width:420px;text-align:center}.start h1{font-size:34px;letter-spacing:-.05em;margin:16px 0 8px}.start p{color:#bdc5cf;line-height:1.5}.start button{width:100%;height:58px;border:0;border-radius:17px;background:white;color:#080a0d;font-size:18px;font-weight:850}
-.logo{width:72px;height:72px;border-radius:23px;margin:auto;background:white;color:#080a0d;display:grid;place-items:center;font-size:34px;font-weight:900}
-.hidden{display:none!important}.toast{position:absolute;z-index:30;left:50%;top:44%;transform:translate(-50%,-50%);padding:9px 14px;border-radius:999px;background:white;color:#080a0d;font-weight:800;opacity:0;transition:.18s;pointer-events:none}.toast.show{opacity:1}
-.note{font-size:12px!important;color:#8f99a6!important}
-@media(min-width:700px){#app{max-width:520px;left:50%;transform:translateX(-50%);box-shadow:0 0 90px #000}}
+.guide{position:absolute;top:16px;left:50%;transform:translateX(-50%);padding:8px 13px;border-radius:999px;background:rgba(7,9,12,.68);backdrop-filter:blur(12px);font-size:13px;font-weight:800;white-space:nowrap}
+.camrow{position:absolute;left:0;right:0;bottom:16px;display:grid;grid-template-columns:48px 1fr 48px;align-items:center;padding:0 18px;gap:16px}
+.glass{border:1px solid rgba(255,255,255,.2);background:rgba(7,9,12,.64);backdrop-filter:blur(12px);color:white}
+.circle{height:48px;border-radius:50%;font-size:20px}
+.mark{justify-self:center;width:72px;height:72px;border-radius:50%;border:5px solid #fff;background:rgba(255,255,255,.18);position:relative}.mark:after{content:"+";position:absolute;inset:5px;border-radius:50%;background:#fff;color:#080a0d;display:grid;place-items:center;font-size:34px}
+.panel{padding:14px 16px 20px}
+.measurebox{background:#151a21;border:1px solid #252c35;border-radius:20px;padding:14px 15px}
+.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#8f99a6;font-weight:800}
+.measure{font-size:34px;font-weight:900;letter-spacing:-.05em;margin-top:2px}.sub{font-size:13px;color:#9fa8b3;margin-top:2px}
+.manual{display:flex;gap:8px;margin-top:12px}.manual input{min-width:0;flex:1;border:1px solid #333b46;background:#0d1116;color:#fff;border-radius:12px;padding:11px}.btn{border:0;border-radius:13px;padding:12px 14px;background:#2a313a;color:#fff;font-weight:800}.btn.primary{background:#fff;color:#080a0d}
+.adjust{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:12px}.adjust button{padding:10px 4px;border:1px solid #333b46;border-radius:11px;background:#11161c;color:#fff;font-weight:750}
+.cutcard{margin-top:12px;padding:14px;border-radius:18px;background:#f3f5f7;color:#0b0d10}.cutline{display:flex;justify-content:space-between;align-items:end}.cutvalue{font-size:37px;font-weight:950;letter-spacing:-.05em}.allow{font-size:12px;color:#5f6874}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}.actions button{height:50px}
+nav{position:fixed;z-index:20;left:50%;bottom:0;transform:translateX(-50%);width:min(600px,100%);padding:8px 12px calc(env(safe-area-inset-bottom) + 8px);background:rgba(10,12,15,.94);backdrop-filter:blur(16px);border-top:1px solid #222831;display:grid;grid-template-columns:repeat(3,1fr)}
+nav button{border:0;background:none;color:#808a97;padding:8px;font-size:12px;font-weight:800}nav button.active{color:#fff}nav span{display:block;font-size:20px;margin-bottom:2px}
+.list{padding:8px 16px 24px}.listhead{display:flex;justify-content:space-between;align-items:center;margin:8px 0 14px}.listhead h1{margin:0;font-size:27px}.item{display:grid;grid-template-columns:38px 1fr auto;gap:10px;align-items:center;padding:14px 0;border-bottom:1px solid #242a32}.letter{width:34px;height:34px;border-radius:10px;background:#20262e;display:grid;place-items:center;font-weight:900}.item strong{font-size:20px}.item small{display:block;color:#8f99a6;margin-top:2px}.check{width:28px;height:28px;border:1px solid #48515d;border-radius:50%;background:none;color:#fff}.check.done{background:#fff;color:#080a0d}
+.settings{padding:10px 16px 30px}.settings h1{font-size:27px}.field{margin:16px 0}.field label{display:block;color:#9da6b1;font-size:12px;font-weight:800;margin-bottom:6px}.field input,.field select{width:100%;border:1px solid #333b46;background:#11161c;color:#fff;border-radius:13px;padding:13px}
+.notice{padding:13px;border-radius:14px;background:#171d24;color:#aeb7c2;font-size:13px;line-height:1.45}
+#start{position:absolute;z-index:50;inset:0;min-height:100dvh;display:grid;place-items:center;padding:26px;background:radial-gradient(circle at 50% 30%,#1d2a38,#080a0d 68%)}
+.start{text-align:center;max-width:410px}.start h1{font-size:36px;letter-spacing:-.05em;margin:16px 0 8px}.start p{color:#b3bdc8;line-height:1.5}.start button{width:100%;height:58px;border:0;border-radius:17px;background:#fff;color:#080a0d;font-weight:900;font-size:18px}.logo{width:72px;height:72px;border-radius:23px;background:#fff;color:#080a0d;margin:auto;display:grid;place-items:center;font-size:32px;font-weight:950}
+.sheet{position:fixed;z-index:40;left:50%;bottom:0;transform:translate(-50%,110%);width:min(600px,100%);padding:18px 16px calc(env(safe-area-inset-bottom) + 18px);background:#181d24;border-radius:24px 24px 0 0;transition:.23s;box-shadow:0 -20px 60px #000}.sheet.open{transform:translate(-50%,0)}.sheet h2{margin:0 0 7px}.sheet p{color:#adb6c1;font-size:14px;line-height:1.45}.cardshape{width:220px;aspect-ratio:1.586;border:2px dashed #7e8996;border-radius:13px;margin:14px auto;display:grid;place-items:center;color:#9ca6b2}
+.hidden{display:none!important}
 </style>
 </head>
 <body><div id="app">
-<video id="cam" autoplay playsinline muted></video><canvas id="cv"></canvas><div class="scrim"></div>
-<div class="top"><div class="brand">Camera Measure</div><button id="menuBtn" class="glass round">•••</button></div>
-<div id="instruction" class="instruction">Aim at first edge</div>
-<div class="cross"><i></i></div><div id="status" class="status">Calibrate once for real measurements</div>
-<div class="bottom"><button id="undo" class="glass side">↶</button><button id="add" class="plus"></button><button id="clear" class="glass side">×</button></div>
-<div id="toast" class="toast"></div>
+<section id="measureScreen" class="screen active">
+<header><div><div class="brand">Cut Measure</div><div class="jobname" id="jobLabel">Current job</div></div><button id="calBtn" class="btn">Calibrate</button></header>
+<div class="camera"><video id="cam" autoplay playsinline muted></video><canvas id="cv"></canvas><div class="scrim"></div><div class="guide" id="guide">Mark first edge</div><div class="cross"><i></i></div>
+<div class="camrow"><button id="undo" class="glass circle">↶</button><button id="mark" class="mark"></button><button id="flip" class="glass circle">↻</button></div></div>
+<div class="panel"><div class="measurebox"><div class="eyebrow">Measured opening</div><div id="opening" class="measure">—</div><div id="measureNote" class="sub">Mark two points, or enter a tape/laser measurement.</div>
+<div class="manual"><input id="manualInput" placeholder='e.g. 46 1/2 or 3ft 10 1/2'><button id="useManual" class="btn">Use exact</button></div></div>
+<div class="adjust"><button data-adj="-0.125">−⅛″</button><button data-adj="-0.0625">−1/16″</button><button data-adj="0.0625">+1/16″</button><button data-adj="0.125">+⅛″</button></div>
+<div class="cutcard"><div class="eyebrow" style="color:#5d6671">CUT THIS</div><div class="cutline"><div id="cut" class="cutvalue">—</div><div id="allowance" class="allow">No adjustment</div></div></div>
+<div class="actions"><button id="saveCut" class="btn primary">Save cut</button><button id="nextCut" class="btn">Measure next</button></div></div>
+</section>
 
-<section id="menu" class="sheet"><div class="handle"></div><h2>Options</h2>
-<button id="units" class="wide">Units · feet & inches</button><button id="cal" class="wide primary">Calibrate measurement</button><button id="flip" class="wide">Switch camera</button><button id="close" class="wide">Done</button></section>
+<section id="listScreen" class="screen"><header><div class="brand">Cut List</div><button id="clearList" class="btn">Clear</button></header><div class="list"><div class="listhead"><h1 id="listTitle">Current job</h1><span id="count">0 cuts</span></div><div id="items"></div></div></section>
+<section id="jobScreen" class="screen"><header><div class="brand">Job</div></header><div class="settings"><h1>Job setup</h1>
+<div class="field"><label>JOB / ROOM NAME</label><input id="jobName" placeholder="Kitchen trim"></div>
+<div class="field"><label>ROUND CUTS TO</label><select id="precision"><option value="16">Nearest 1/16″</option><option value="8" selected>Nearest 1/8″</option><option value="4">Nearest 1/4″</option></select></div>
+<div class="field"><label>DEFAULT FIT ALLOWANCE</label><select id="defaultAllowance"><option value="0">No adjustment</option><option value="-0.0625">−1/16″</option><option value="-0.125">−1/8″</option><option value="-0.25">−1/4″</option></select></div>
+<div class="notice"><b>Precision note:</b> camera measurement is reference-calibrated and can shift with distance/perspective. For critical finish cuts, use the tape/laser field to enter the exact dimension; Cut Measure will still handle the allowance and cut list.</div></div></section>
 
-<section id="calSheet" class="sheet"><div class="handle"></div><h2>One-time calibration</h2>
-<p>Put a standard credit card <b>flat against the object</b> at the same distance from the camera. We know its long edge is 85.60 mm.</p><div class="card">credit card · long edge</div>
-<p id="calHelp"><b>Step 1 of 2:</b> Aim the center + at the card's left edge.</p>
-<button id="calPoint" class="wide primary">Mark left edge</button><button id="cancelCal" class="wide">Cancel</button>
-<p class="note">Important: a normal web camera has no reliable depth scale. Calibration is what converts screen distance into inches/cm. Recalibrate when the object distance changes significantly.</p></section>
+<nav><button data-screen="measureScreen" class="active"><span>⊕</span>Measure</button><button data-screen="listScreen"><span>☷</span>Cut list</button><button data-screen="jobScreen"><span>▣</span>Job</button></nav>
 
-<div id="start"><div class="start"><div class="logo">↔</div><h1>Camera Measure</h1><p>Measure between two visible points. For real inches or centimeters, do the quick credit-card calibration first.</p><button id="startBtn">Open camera</button><p class="note">Camera video stays in your browser.</p></div></div>
+<section id="calSheet" class="sheet"><h2>Quick camera calibration</h2><p>Hold a standard credit card flat against the same surface you're measuring. Mark its long edge (85.60 mm).</p><div class="cardshape">credit card · long edge</div><p id="calHelp"><b>1.</b> Aim the + at the left edge.</p><button id="calPoint" class="btn primary" style="width:100%">Mark left edge</button><button id="cancelCal" class="btn" style="width:100%;margin-top:8px">Cancel</button></section>
+
+<div id="start"><div class="start"><div class="logo">↔</div><h1>Cut Measure</h1><p>Measure an opening, adjust for fit, and save the exact cut to your job list.</p><button id="startBtn">Start measuring</button><p style="font-size:12px">For critical cuts, you can always enter your tape or laser measurement exactly.</p></div></div>
 </div>
 <script>
-const $=s=>document.querySelector(s),v=$('#cam'),c=$('#cv'),x=c.getContext('2d');
-let stream,face='environment',pts=[],scale=+localStorage.measureScale||0,unit=localStorage.measureUnit||'ftin',calPts=[],calibrating=false;
-function resize(){c.width=innerWidth*devicePixelRatio;c.height=innerHeight*devicePixelRatio;draw()} addEventListener('resize',resize);resize();
-async function start(){try{if(stream)stream.getTracks().forEach(t=>t.stop());stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:face},width:{ideal:1920},height:{ideal:1080}},audio:false});v.srcObject=stream;await v.play();$('#start').classList.add('hidden');update()}catch(e){alert('Please allow camera access, then reload the page.')}}
+const $=s=>document.querySelector(s),v=$('#cam'),c=$('#cv'),ctx=c.getContext('2d');
+let stream,face='environment',pts=[],scale=+localStorage.cutScale||0,openingIn=null,adjustment=0,calPts=[],calMode=false;
+let cuts=JSON.parse(localStorage.cutList||'[]');
+let job=localStorage.cutJob||'',precision=+(localStorage.cutPrecision||8),defaultAdj=+(localStorage.cutDefaultAdj||0);adjustment=defaultAdj;
+function resize(){let r=c.getBoundingClientRect();c.width=r.width*devicePixelRatio;c.height=r.height*devicePixelRatio;draw()}addEventListener('resize',resize);setTimeout(resize,50);
+async function start(){let b=$('#startBtn');b.textContent='Opening camera…';try{if(!navigator.mediaDevices?.getUserMedia)throw 0;stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:face},width:{ideal:1920},height:{ideal:1080}},audio:false});v.srcObject=stream;await v.play();$('#start').classList.add('hidden');resize()}catch(e){b.textContent='Try again';b.previousElementSibling.textContent='Camera could not open. Use the HTTPS GitHub Pages link and allow camera permission.'}}
 $('#startBtn').onclick=start;
 const center=()=>({x:c.width/2,y:c.height/2}),dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
-function fraction(n){let w=Math.floor(n),e=Math.round((n-w)*8);if(e===8){w++;e=0}return w+(['','⅛','¼','⅜','½','⅝','¾','⅞'][e]||'')}
-function format(inches){if(unit==='cm')return (inches*2.54).toFixed(1)+' cm';if(unit==='in')return fraction(inches)+'″';let ft=Math.floor(inches/12),rem=inches-ft*12;return ft?`${ft}′ ${fraction(rem)}″`:`${fraction(rem)}″`}
-function label(){if(pts.length<2)return'';return scale?format(dist(pts[0],pts[1])/scale):Math.round(dist(pts[0],pts[1])/devicePixelRatio)+' px'}
-function update(){if(calibrating)return;$('#instruction').textContent=pts.length===0?'Aim at first edge':pts.length===1?'Aim at second edge':'Measurement complete';$('#status').textContent=pts.length===2?(scale?label():'Pixel distance only · calibrate for inches'):scale?'Tap + to mark a point':'Calibrate once for real measurements';$('#units').textContent='Units · '+(unit==='ftin'?'feet & inches':unit==='in'?'inches':'centimeters');draw()}
-function rr(ctx,a,b,w,h,r){ctx.beginPath();ctx.roundRect(a,b,w,h,r)}
-function draw(){x.clearRect(0,0,c.width,c.height);if(!pts.length)return;x.save();x.lineWidth=4*devicePixelRatio;x.strokeStyle=x.fillStyle='#fff';x.shadowColor='rgba(0,0,0,.7)';x.shadowBlur=8*devicePixelRatio;pts.forEach(p=>{x.beginPath();x.arc(p.x,p.y,7*devicePixelRatio,0,Math.PI*2);x.fill()});if(pts.length===2){x.beginPath();x.moveTo(pts[0].x,pts[0].y);x.lineTo(pts[1].x,pts[1].y);x.stroke();let t=label(),mx=(pts[0].x+pts[1].x)/2,my=(pts[0].y+pts[1].y)/2;x.font=`800 ${20*devicePixelRatio}px system-ui`;let w=x.measureText(t).width+26*devicePixelRatio;x.shadowBlur=0;x.fillStyle='rgba(5,7,10,.84)';rr(x,mx-w/2,my-46*devicePixelRatio,w,36*devicePixelRatio,11*devicePixelRatio);x.fill();x.fillStyle='#fff';x.textAlign='center';x.fillText(t,mx,my-20*devicePixelRatio)}x.restore()}
-function pop(t){$('#toast').textContent=t;$('#toast').classList.add('show');setTimeout(()=>$('#toast').classList.remove('show'),700)}
-$('#add').onclick=()=>{if(pts.length===2)pts=[];pts.push(center());if(navigator.vibrate)navigator.vibrate(20);pop(pts.length===1?'First edge marked':'Measured');update()}
-$('#undo').onclick=()=>{pts.pop();update()};$('#clear').onclick=()=>{pts=[];update();pop('Cleared')};
-$('#menuBtn').onclick=()=>$('#menu').classList.add('open');$('#close').onclick=()=>$('#menu').classList.remove('open');
-$('#units').onclick=()=>{unit=unit==='ftin'?'in':unit==='in'?'cm':'ftin';localStorage.measureUnit=unit;update()};
-$('#flip').onclick=async()=>{face=face==='environment'?'user':'environment';$('#menu').classList.remove('open');await start()};
-$('#cal').onclick=()=>{$('#menu').classList.remove('open');$('#calSheet').classList.add('open');calPts=[];calibrating=true;$('#calHelp').innerHTML='<b>Step 1 of 2:</b> Aim the center + at the card\\'s left edge.';$('#calPoint').textContent='Mark left edge';$('#instruction').textContent='Aim at card left edge'};
-$('#cancelCal').onclick=()=>{calibrating=false;calPts=[];$('#calSheet').classList.remove('open');update()};
-$('#calPoint').onclick=()=>{calPts.push(center());if(calPts.length===1){$('#calHelp').innerHTML='<b>Step 2 of 2:</b> Move the center + to the card\\'s right edge.';$('#calPoint').textContent='Mark right edge';$('#instruction').textContent='Aim at card right edge'}else{scale=dist(calPts[0],calPts[1])/(85.60/25.4);localStorage.measureScale=scale;calibrating=false;calPts=[];$('#calSheet').classList.remove('open');pts=[];pop('Calibration saved');update()}};
-update();
+function gcd(a,b){return b?gcd(b,a%b):a}
+function fmt(n){if(n==null||!isFinite(n))return'—';n=Math.max(0,n);let den=precision,num=Math.round((n-Math.floor(n))*den),whole=Math.floor(n);if(num===den){whole++;num=0}let g=num?gcd(num,den):1,num2=num/g,den2=den/g;let ft=Math.floor(whole/12),inch=whole-ft*12;let frac=num?` ${num2}/${den2}`:'';return ft?`${ft}′ ${inch}${frac}″`:`${inch}${frac}″`}
+function update(){if(!calMode)$('#guide').textContent=pts.length?'Mark second edge':'Mark first edge';$('#opening').textContent=fmt(openingIn);$('#cut').textContent=fmt(openingIn==null?null:openingIn+adjustment);$('#allowance').textContent=adjustment===0?'No adjustment':`${adjustment>0?'+':''}${fractionText(adjustment)} allowance`;$('#measureNote').textContent=openingIn==null?(scale?'Camera calibrated · mark two points':'Camera needs calibration for real units, or use exact entry'):(pts.length===2?'Camera measurement':'Exact tape/laser measurement');draw()}
+function fractionText(n){let sign=n<0?'−':'',a=Math.abs(n),den=16,num=Math.round(a*den),g=gcd(num,den);return sign+(num/g)+'/'+(den/g)+'″'}
+function draw(){ctx.clearRect(0,0,c.width,c.height);if(!pts.length)return;ctx.save();ctx.strokeStyle=ctx.fillStyle='#fff';ctx.lineWidth=4*devicePixelRatio;ctx.shadowColor='#000';ctx.shadowBlur=7*devicePixelRatio;pts.forEach(p=>{ctx.beginPath();ctx.arc(p.x,p.y,7*devicePixelRatio,0,Math.PI*2);ctx.fill()});if(pts.length===2){ctx.beginPath();ctx.moveTo(pts[0].x,pts[0].y);ctx.lineTo(pts[1].x,pts[1].y);ctx.stroke();let t=fmt(openingIn),mx=(pts[0].x+pts[1].x)/2,my=(pts[0].y+pts[1].y)/2;ctx.font=`800 ${18*devicePixelRatio}px system-ui`;let w=ctx.measureText(t).width+22*devicePixelRatio;ctx.shadowBlur=0;ctx.fillStyle='rgba(6,8,11,.84)';ctx.beginPath();ctx.roundRect(mx-w/2,my-42*devicePixelRatio,w,32*devicePixelRatio,9*devicePixelRatio);ctx.fill();ctx.fillStyle='#fff';ctx.textAlign='center';ctx.fillText(t,mx,my-19*devicePixelRatio)}ctx.restore()}
+$('#mark').onclick=()=>{if(pts.length===2){pts=[];openingIn=null}pts.push(center());if(pts.length===2){openingIn=scale?dist(pts[0],pts[1])/scale:null}update()};
+$('#undo').onclick=()=>{pts.pop();if(pts.length<2)openingIn=null;update()};$('#flip').onclick=async()=>{face=face==='environment'?'user':'environment';if(stream)stream.getTracks().forEach(t=>t.stop());await start()};
+function parseMeasure(s){s=s.toLowerCase().trim().replace(/"/g,'').replace(/in(ch(es)?)?/g,'');let ft=0;if(s.includes('ft')||s.includes("'")){let parts=s.split(/ft|'/);ft=parseFloat(parts[0])||0;s=parts[1]||''}let m=s.match(/(\d+(?:\.\d+)?)?\s*(?:(\d+)\s*\/\s*(\d+))?/);if(!m)return null;let inches=parseFloat(m[1])||0;if(m[2]&&m[3])inches+=+m[2]/+m[3];let val=ft*12+inches;return val>0?val:null}
+$('#useManual').onclick=()=>{let n=parseMeasure($('#manualInput').value);if(n==null){alert('Try a measurement like 46 1/2 or 3ft 10 1/2.');return}openingIn=n;pts=[];update()};
+document.querySelectorAll('[data-adj]').forEach(b=>b.onclick=()=>{adjustment+=+b.dataset.adj;update()});
+$('#nextCut').onclick=()=>{pts=[];openingIn=null;adjustment=defaultAdj;$('#manualInput').value='';update()};
+$('#saveCut').onclick=()=>{if(openingIn==null){alert('Measure or enter an opening first.');return}cuts.push({id:Date.now(),label:String.fromCharCode(65+(cuts.length%26)),opening:openingIn,adjustment,cut:openingIn+adjustment,done:false});localStorage.cutList=JSON.stringify(cuts);renderList();$('#nextCut').click();alert('Cut saved to the job list.')};
+function renderList(){let box=$('#items');box.innerHTML='';cuts.forEach((q,i)=>{let d=document.createElement('div');d.className='item';d.innerHTML=`<button class="check ${q.done?'done':''}">${q.done?'✓':''}</button><div><strong>${q.label} · ${fmt(q.cut)}</strong><small>Opening ${fmt(q.opening)} · ${q.adjustment?fractionText(q.adjustment)+' fit':'no adjustment'}</small></div><button class="btn" data-del="${i}">×</button>`;d.querySelector('.check').onclick=()=>{q.done=!q.done;localStorage.cutList=JSON.stringify(cuts);renderList()};d.querySelector('[data-del]').onclick=()=>{cuts.splice(i,1);localStorage.cutList=JSON.stringify(cuts);renderList()};box.appendChild(d)});$('#count').textContent=`${cuts.length} cut${cuts.length===1?'':'s'}`;$('#listTitle').textContent=job||'Current job'}
+$('#clearList').onclick=()=>{if(confirm('Clear the whole cut list?')){cuts=[];localStorage.cutList='[]';renderList()}};
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.querySelectorAll('nav button').forEach(n=>n.classList.remove('active'));$('#'+b.dataset.screen).classList.add('active');b.classList.add('active');if(b.dataset.screen==='measureScreen')setTimeout(resize,20)});
+$('#jobName').value=job;$('#precision').value=precision;$('#defaultAllowance').value=defaultAdj;
+$('#jobName').oninput=e=>{job=e.target.value;localStorage.cutJob=job;$('#jobLabel').textContent=job||'Current job';renderList()};
+$('#precision').onchange=e=>{precision=+e.target.value;localStorage.cutPrecision=precision;update();renderList()};
+$('#defaultAllowance').onchange=e=>{defaultAdj=+e.target.value;localStorage.cutDefaultAdj=defaultAdj;adjustment=defaultAdj;update()};
+$('#jobLabel').textContent=job||'Current job';
+$('#calBtn').onclick=()=>{$('#calSheet').classList.add('open');calMode=true;calPts=[];$('#calHelp').innerHTML='<b>1.</b> Aim the + at the left edge.';$('#calPoint').textContent='Mark left edge';$('#guide').textContent='Card: left edge'};
+$('#cancelCal').onclick=()=>{calMode=false;$('#calSheet').classList.remove('open');update()};
+$('#calPoint').onclick=()=>{calPts.push(center());if(calPts.length===1){$('#calHelp').innerHTML='<b>2.</b> Move the + to the right edge.';$('#calPoint').textContent='Mark right edge';$('#guide').textContent='Card: right edge'}else{scale=dist(calPts[0],calPts[1])/(85.60/25.4);localStorage.cutScale=scale;calMode=false;$('#calSheet').classList.remove('open');pts=[];openingIn=null;update()}};
+renderList();update();
 </script></body></html>
