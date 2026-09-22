@@ -6,191 +6,74 @@
 <meta name="theme-color" content="#05070a">
 <title>Camera Measure</title>
 <style>
-:root{font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color-scheme:dark}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#05070a;color:#fff}
-button,input,select{font:inherit}button{cursor:pointer}
-#app{position:fixed;inset:0;background:#05070a;overflow:hidden}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#05070a;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+button{font:inherit} #app{position:fixed;inset:0;overflow:hidden;background:#05070a}
 video,canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-video{background:radial-gradient(circle at 50% 40%,#18202a,#05070a 70%)}
 canvas{touch-action:none}
-.scrim{position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(0,0,0,.44),transparent 22%,transparent 68%,rgba(0,0,0,.58))}
-.top{position:absolute;left:0;right:0;top:0;padding:calc(env(safe-area-inset-top) + 12px) 16px 8px;display:flex;align-items:center;justify-content:space-between;pointer-events:none}
-.brand{font-size:17px;font-weight:800;letter-spacing:-.03em;text-shadow:0 2px 12px #000}
-.top button{pointer-events:auto}
-.glass{border:1px solid rgba(255,255,255,.18);background:rgba(7,10,14,.58);backdrop-filter:blur(16px);color:#fff;box-shadow:0 7px 24px rgba(0,0,0,.2)}
-.circle{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-size:20px}
-.guide{position:absolute;top:calc(env(safe-area-inset-top) + 72px);left:50%;transform:translateX(-50%);font-weight:750;font-size:15px;text-align:center;text-shadow:0 2px 10px #000;transition:.2s;pointer-events:none}
-.guide.fade{opacity:.15}
-.cross{position:absolute;left:50%;top:50%;width:42px;height:42px;transform:translate(-50%,-50%);pointer-events:none;filter:drop-shadow(0 2px 3px #000)}
-.cross:before,.cross:after{content:"";position:absolute;background:#fff;border-radius:2px}
-.cross:before{width:2px;height:42px;left:20px}.cross:after{height:2px;width:42px;top:20px}
-.cross span{position:absolute;inset:14px;border:2px solid #fff;border-radius:50%}
-.bottom{position:absolute;left:0;right:0;bottom:0;padding:12px 18px calc(env(safe-area-inset-bottom) + 18px);display:grid;grid-template-columns:52px 1fr 52px;align-items:center;gap:18px}
-.action{height:52px;border-radius:50%;font-size:21px}
-.shutter{justify-self:center;width:76px;height:76px;border-radius:50%;border:5px solid rgba(255,255,255,.96);background:rgba(255,255,255,.18);box-shadow:0 5px 24px rgba(0,0,0,.35);position:relative}
-.shutter:after{content:"+";position:absolute;inset:5px;border-radius:50%;background:#fff;color:#090b0f;display:grid;place-items:center;font-size:34px;font-weight:500}
-.shutter:active:after{transform:scale(.94)}
-.badge{position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom) + 112px);transform:translateX(-50%);padding:8px 13px;border-radius:999px;background:rgba(7,10,14,.68);backdrop-filter:blur(15px);font-size:13px;font-weight:700;white-space:nowrap;transition:.2s}
-.badge.hidden{opacity:0;transform:translate(-50%,8px);pointer-events:none}
-.sheet{position:absolute;z-index:8;left:10px;right:10px;bottom:calc(env(safe-area-inset-bottom) + 10px);border-radius:25px;background:rgba(19,23,30,.97);box-shadow:0 24px 70px rgba(0,0,0,.58);padding:18px;transform:translateY(120%);transition:.25s ease}
-.sheet.open{transform:translateY(0)}
-.handle{width:42px;height:5px;border-radius:5px;background:#59606b;margin:-6px auto 14px}
-.sheet h2{margin:0 0 6px;font-size:21px}.sheet p{margin:0 0 15px;color:#b8c0ca;font-size:14px;line-height:1.45}
-.menu button,.wide{width:100%;height:49px;border:0;border-radius:14px;margin-top:8px;font-weight:750;background:#2b313a;color:#fff;text-align:left;padding:0 15px}
-.menu button:last-child{color:#ff8e8e}
-.row{display:flex;gap:10px}.row button{flex:1;text-align:center}
-.primary{background:#fff!important;color:#080a0d!important}
+.scrim{position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(0,0,0,.42),transparent 22%,transparent 69%,rgba(0,0,0,.6))}
+.top{position:absolute;top:0;left:0;right:0;padding:calc(env(safe-area-inset-top) + 13px) 16px;display:flex;justify-content:space-between;align-items:center}
+.brand{font-weight:800;font-size:17px;text-shadow:0 2px 12px #000}.glass{border:1px solid rgba(255,255,255,.2);background:rgba(7,10,14,.6);backdrop-filter:blur(14px);color:#fff}
+.round{width:44px;height:44px;border-radius:50%;font-size:19px}
+.instruction{position:absolute;top:calc(env(safe-area-inset-top) + 78px);left:50%;transform:translateX(-50%);padding:9px 14px;border-radius:999px;background:rgba(5,7,10,.66);backdrop-filter:blur(12px);font-size:14px;font-weight:750;white-space:nowrap}
+.bottom{position:absolute;bottom:0;left:0;right:0;padding:12px 18px calc(env(safe-area-inset-bottom) + 18px);display:grid;grid-template-columns:54px 1fr 54px;align-items:center;gap:18px}
+.side{height:54px;border-radius:50%;font-size:21px}.plus{justify-self:center;width:78px;height:78px;border:5px solid white;border-radius:50%;background:rgba(255,255,255,.16);position:relative}
+.plus:after{content:"+";position:absolute;inset:5px;border-radius:50%;display:grid;place-items:center;background:white;color:#080a0d;font-size:36px}
+.status{position:absolute;bottom:calc(env(safe-area-inset-bottom) + 116px);left:50%;transform:translateX(-50%);padding:8px 13px;border-radius:999px;background:rgba(5,7,10,.68);backdrop-filter:blur(12px);font-size:13px;font-weight:700;white-space:nowrap}
+.cross{position:absolute;left:50%;top:50%;width:42px;height:42px;transform:translate(-50%,-50%);pointer-events:none;filter:drop-shadow(0 2px 4px #000)}
+.cross:before,.cross:after{content:"";position:absolute;background:#fff}.cross:before{width:2px;height:42px;left:20px}.cross:after{height:2px;width:42px;top:20px}.cross i{position:absolute;inset:14px;border:2px solid #fff;border-radius:50%}
+.sheet{position:absolute;z-index:10;left:10px;right:10px;bottom:calc(env(safe-area-inset-bottom) + 10px);padding:18px;border-radius:25px;background:rgba(19,23,30,.98);box-shadow:0 20px 70px #000;transform:translateY(120%);transition:.24s}
+.sheet.open{transform:translateY(0)}.handle{width:42px;height:5px;background:#59616d;border-radius:5px;margin:-6px auto 14px}.sheet h2{margin:0 0 7px}.sheet p{color:#bdc5cf;line-height:1.45;font-size:14px}
+.wide{width:100%;height:50px;border:0;border-radius:14px;margin-top:9px;background:#2c333d;color:white;font-weight:750}.primary{background:white;color:#080a0d}
+.card{width:min(250px,80%);aspect-ratio:1.586;border:2px dashed #84909f;border-radius:13px;margin:15px auto;display:grid;place-items:center;color:#aeb7c3;font-weight:750}
 #start{position:absolute;z-index:20;inset:0;display:grid;place-items:center;padding:26px;background:radial-gradient(circle at 50% 35%,#1a2634,#05070a 67%)}
-.startcard{width:min(430px,100%);text-align:center}
-.logo{width:72px;height:72px;border-radius:23px;margin:auto;background:#fff;color:#080a0d;display:grid;place-items:center;font-size:34px;font-weight:900}
-.startcard h1{font-size:34px;letter-spacing:-.05em;margin:20px 0 8px}.startcard p{color:#b9c1cb;line-height:1.5;margin:0 auto 23px;max-width:340px}
-.startcard button{width:100%;height:58px;border:0;border-radius:17px;background:#fff;color:#080a0d;font-size:18px;font-weight:850}
-.tiny{font-size:12px!important;color:#858d98!important;margin-top:13px!important}
-.hidden{display:none!important}
-.toast{position:absolute;z-index:30;left:50%;top:47%;transform:translate(-50%,-50%);padding:9px 14px;border-radius:999px;background:#fff;color:#080a0d;font-weight:800;opacity:0;pointer-events:none;transition:.18s}.toast.show{opacity:1}
-#magnifier{position:absolute;z-index:6;width:116px;height:116px;border-radius:50%;border:3px solid #fff;box-shadow:0 8px 30px #000;background-repeat:no-repeat;display:none;pointer-events:none;overflow:hidden}
-#magnifier:before,#magnifier:after{content:"";position:absolute;background:#fff;left:50%;top:50%;transform:translate(-50%,-50%)}#magnifier:before{width:24px;height:1px}#magnifier:after{height:24px;width:1px}
-.calcard{padding:14px;border-radius:18px;background:#0c1016;margin:12px 0}.cardshape{aspect-ratio:1.586/1;border:2px dashed #7f8a98;border-radius:13px;display:grid;place-items:center;color:#aeb7c3;font-weight:700;margin:10px auto;width:min(250px,80%)}
-.field{display:grid;gap:6px;margin-top:12px}.field label{font-size:12px;color:#aeb7c3}.field select{padding:12px;border-radius:12px;border:1px solid #3a424e;background:#0d1117;color:#fff}
-@media(min-width:700px){#app{max-width:520px;left:50%;transform:translateX(-50%);box-shadow:0 0 90px #000}.sheet{left:18px;right:18px}}
+.start{max-width:420px;text-align:center}.start h1{font-size:34px;letter-spacing:-.05em;margin:16px 0 8px}.start p{color:#bdc5cf;line-height:1.5}.start button{width:100%;height:58px;border:0;border-radius:17px;background:white;color:#080a0d;font-size:18px;font-weight:850}
+.logo{width:72px;height:72px;border-radius:23px;margin:auto;background:white;color:#080a0d;display:grid;place-items:center;font-size:34px;font-weight:900}
+.hidden{display:none!important}.toast{position:absolute;z-index:30;left:50%;top:44%;transform:translate(-50%,-50%);padding:9px 14px;border-radius:999px;background:white;color:#080a0d;font-weight:800;opacity:0;transition:.18s;pointer-events:none}.toast.show{opacity:1}
+.note{font-size:12px!important;color:#8f99a6!important}
+@media(min-width:700px){#app{max-width:520px;left:50%;transform:translateX(-50%);box-shadow:0 0 90px #000}}
 </style>
 </head>
-<body>
-<div id="app">
-<video id="camera" autoplay playsinline muted></video>
-<canvas id="overlay"></canvas><div class="scrim"></div>
-<div class="top"><div class="brand">Camera Measure</div><button id="menuBtn" class="glass circle">•••</button></div>
-<div id="guide" class="guide">Mark first edge</div>
-<div class="cross"><span></span></div><div id="magnifier"></div><div id="toast" class="toast"></div>
-<div id="accuracy" class="badge">Tap + to place a point</div>
-<div class="bottom">
-  <button id="undo" class="glass action">↶</button>
-  <button id="add" class="shutter" aria-label="Add measurement point"></button>
-  <button id="photo" class="glass action">▣</button>
-</div>
+<body><div id="app">
+<video id="cam" autoplay playsinline muted></video><canvas id="cv"></canvas><div class="scrim"></div>
+<div class="top"><div class="brand">Camera Measure</div><button id="menuBtn" class="glass round">•••</button></div>
+<div id="instruction" class="instruction">Aim at first edge</div>
+<div class="cross"><i></i></div><div id="status" class="status">Calibrate once for real measurements</div>
+<div class="bottom"><button id="undo" class="glass side">↶</button><button id="add" class="plus"></button><button id="clear" class="glass side">×</button></div>
+<div id="toast" class="toast"></div>
 
-<section id="menu" class="sheet menu">
- <div class="handle"></div><h2>Camera Measure</h2><p>Keep the phone and measured surface as steady and square-on as possible.</p>
- <button id="units">Units · feet & inches</button>
- <button id="calibrate">Quick calibration</button>
- <button id="flip">Switch camera</button>
- <button id="clear">Clear all measurements</button>
- <div class="row"><button id="closeMenu" class="primary">Done</button></div>
-</section>
+<section id="menu" class="sheet"><div class="handle"></div><h2>Options</h2>
+<button id="units" class="wide">Units · feet & inches</button><button id="cal" class="wide primary">Calibrate measurement</button><button id="flip" class="wide">Switch camera</button><button id="close" class="wide">Done</button></section>
 
-<section id="calSheet" class="sheet">
- <div class="handle"></div><h2>Quick calibration</h2>
- <p>Place a standard credit card flat on the same surface you want to measure. We'll use its 85.60 mm width as a reference.</p>
- <div class="calcard"><div class="cardshape">Credit card</div><p style="text-align:center;margin:0">Use the long edge</p></div>
- <p id="calText"><b>1.</b> Aim the + at the left edge of the card, then tap Start.</p>
- <div class="row"><button id="cancelCal" class="wide">Cancel</button><button id="calAction" class="wide primary">Start</button></div>
-</section>
+<section id="calSheet" class="sheet"><div class="handle"></div><h2>One-time calibration</h2>
+<p>Put a standard credit card <b>flat against the object</b> at the same distance from the camera. We know its long edge is 85.60 mm.</p><div class="card">credit card · long edge</div>
+<p id="calHelp"><b>Step 1 of 2:</b> Aim the center + at the card's left edge.</p>
+<button id="calPoint" class="wide primary">Mark left edge</button><button id="cancelCal" class="wide">Cancel</button>
+<p class="note">Important: a normal web camera has no reliable depth scale. Calibration is what converts screen distance into inches/cm. Recalibrate when the object distance changes significantly.</p></section>
 
-<div id="start">
- <div class="startcard"><div class="logo">↔</div><h1>Camera Measure</h1>
- <p>Measure objects with your camera. Mark two edges and the dimension appears on screen.</p>
- <button id="startBtn">Open camera</button><p class="tiny">Your camera feed stays on this device.</p></div>
-</div>
+<div id="start"><div class="start"><div class="logo">↔</div><h1>Camera Measure</h1><p>Measure between two visible points. For real inches or centimeters, do the quick credit-card calibration first.</p><button id="startBtn">Open camera</button><p class="note">Camera video stays in your browser.</p></div></div>
 </div>
 <script>
-const $=s=>document.querySelector(s), video=$('#camera'), canvas=$('#overlay'), ctx=canvas.getContext('2d');
-const guide=$('#guide'), toast=$('#toast'), mag=$('#magnifier');
-let stream=null,facing='environment',measurements=[],draft=[],unit=localStorage.cmUnit||'ftin';
-let pxPerIn=+localStorage.cmScale||0, cal=[],calMode=false,drag=null,pressTimer=null;
-
-function size(){canvas.width=innerWidth*devicePixelRatio;canvas.height=innerHeight*devicePixelRatio;draw()}
-addEventListener('resize',size);size();
-async function camera(){
- if(stream)stream.getTracks().forEach(t=>t.stop());
- try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:facing},width:{ideal:1920},height:{ideal:1080}},audio:false});video.srcObject=stream;await video.play();$('#start').classList.add('hidden')}
- catch(e){alert('Camera permission is needed. Allow camera access in your browser, then reload.')}
-}
-$('#startBtn').onclick=camera;
-function center(){return{x:canvas.width/2,y:canvas.height/2}}
-function d(a,b){return Math.hypot(a.x-b.x,a.y-b.y)}
-function inchesFor(m){return pxPerIn?d(m[0],m[1])/pxPerIn:null}
-function frac8(v){let whole=Math.floor(v),n=Math.round((v-whole)*8);if(n===8){whole++;n=0}let map=['','⅛','¼','⅜','½','⅝','¾','⅞'];return whole+(n?map[n]:'')}
-function label(inches){
- if(inches==null)return 'Set calibration';
- if(unit==='cm')return (inches*2.54).toFixed(inches*2.54>=100?1:2)+' cm';
- if(unit==='in')return frac8(inches)+'″';
- let ft=Math.floor(inches/12),rem=inches-ft*12;return ft?`${ft}′ ${frac8(rem)}″`:`${frac8(rem)}″`;
-}
-function pop(t){toast.textContent=t;toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),650)}
-function update(){
- if(calMode)return;
- guide.textContent=draft.length?'Mark second edge':'Mark first edge';
- $('#accuracy').textContent=pxPerIn?(measurements.length||draft.length?'Tap + to keep measuring':'Ready to measure'):'Calibration recommended';
- $('#units').textContent='Units · '+(unit==='ftin'?'feet & inches':unit==='in'?'inches':'centimeters');
- draw();
-}
-function draw(){
- ctx.clearRect(0,0,canvas.width,canvas.height);
- let all=[...measurements]; if(draft.length)all.push(draft);
- all.forEach((m,idx)=>{
-   if(!m.length)return;ctx.save();ctx.lineWidth=3*devicePixelRatio;ctx.strokeStyle='#fff';ctx.fillStyle='#fff';ctx.shadowColor='rgba(0,0,0,.7)';ctx.shadowBlur=7*devicePixelRatio;
-   m.forEach(p=>{ctx.beginPath();ctx.arc(p.x,p.y,6*devicePixelRatio,0,Math.PI*2);ctx.fill()});
-   if(m.length===2){ctx.beginPath();ctx.moveTo(m[0].x,m[0].y);ctx.lineTo(m[1].x,m[1].y);ctx.stroke();
-     let text=label(inchesFor(m)),mx=(m[0].x+m[1].x)/2,my=(m[0].y+m[1].y)/2;
-     ctx.font=`800 ${18*devicePixelRatio}px system-ui`;let w=ctx.measureText(text).width+22*devicePixelRatio;
-     ctx.shadowBlur=0;ctx.fillStyle='rgba(5,7,10,.82)';roundRect(mx-w/2,my-40*devicePixelRatio,w,31*devicePixelRatio,10*devicePixelRatio);ctx.fill();
-     ctx.fillStyle='#fff';ctx.textAlign='center';ctx.fillText(text,mx,my-18*devicePixelRatio);
-   }ctx.restore();
- });
-}
-function roundRect(x,y,w,h,r){ctx.beginPath();ctx.roundRect(x,y,w,h,r)}
-function addPoint(){
- if(calMode)return;
- draft.push(center()); if(navigator.vibrate)navigator.vibrate(18);pop('Point added');
- if(draft.length===2){measurements.push(draft);draft=[];guide.textContent='Measured';setTimeout(update,800)} update();
-}
-$('#add').onclick=addPoint;
-$('#undo').onclick=()=>{if(draft.length)draft.pop();else measurements.pop();update()};
-$('#clear').onclick=()=>{measurements=[];draft=[];closeSheets();update();pop('Cleared')};
-$('#menuBtn').onclick=()=>$('#menu').classList.add('open');$('#closeMenu').onclick=closeSheets;
-function closeSheets(){document.querySelectorAll('.sheet').forEach(x=>x.classList.remove('open'))}
-$('#units').onclick=()=>{unit=unit==='ftin'?'in':unit==='in'?'cm':'ftin';localStorage.cmUnit=unit;update()};
-$('#flip').onclick=async()=>{facing=facing==='environment'?'user':'environment';closeSheets();await camera()};
-$('#calibrate').onclick=()=>{closeSheets();$('#calSheet').classList.add('open');$('#calText').innerHTML='<b>1.</b> Aim the + at the left edge of the card, then tap Start.';$('#calAction').textContent='Start';cal=[]};
-$('#cancelCal').onclick=()=>{calMode=false;cal=[];closeSheets();update()};
-$('#calAction').onclick=()=>{
- if(!calMode){calMode=true;cal=[center()];$('#calText').innerHTML='<b>2.</b> Move the + to the right edge of the card, then tap Finish.';$('#calAction').textContent='Finish';guide.textContent='Mark other card edge';return}
- cal.push(center());pxPerIn=d(cal[0],cal[1])/(85.60/25.4);localStorage.cmScale=pxPerIn;calMode=false;cal=[];closeSheets();update();pop('Calibrated');
-};
-
-function canvasPoint(e){let r=canvas.getBoundingClientRect();return{x:(e.clientX-r.left)*devicePixelRatio,y:(e.clientY-r.top)*devicePixelRatio}}
-function nearest(p){
- let best=null,bd=32*devicePixelRatio;
- measurements.forEach((m,mi)=>m.forEach((q,pi)=>{let z=d(p,q);if(z<bd){bd=z;best={mi,pi}}}));
- return best;
-}
-canvas.addEventListener('pointerdown',e=>{
- let p=canvasPoint(e),n=nearest(p);if(n){drag=n;canvas.setPointerCapture(e.pointerId)}
- pressTimer=setTimeout(()=>showMag(e),280);
-});
-canvas.addEventListener('pointermove',e=>{
- if(drag){let p=canvasPoint(e);measurements[drag.mi][drag.pi]=p;draw()}
- if(mag.style.display==='block')showMag(e);
-});
-canvas.addEventListener('pointerup',e=>{clearTimeout(pressTimer);pressTimer=null;drag=null;mag.style.display='none'});
-canvas.addEventListener('pointercancel',()=>{clearTimeout(pressTimer);drag=null;mag.style.display='none'});
-function showMag(e){
- if(!video.videoWidth)return;let r=canvas.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;
- mag.style.display='block';mag.style.left=Math.max(8,Math.min(innerWidth-124,x-58))+'px';mag.style.top=Math.max(90,y-145)+'px';
- try{let c=document.createElement('canvas');c.width=116;c.height=116,cc=c.getContext('2d');let sx=(x/r.width)*video.videoWidth,sy=(y/r.height)*video.videoHeight;
- cc.drawImage(video,sx-35,sy-35,70,70,0,0,116,116);mag.style.backgroundImage=`url(${c.toDataURL()})`}catch(_){}
-}
-$('#photo').onclick=()=>{
- if(!video.videoWidth){pop('Camera not ready');return}
- let c=document.createElement('canvas');c.width=canvas.width;c.height=canvas.height;let x=c.getContext('2d');
- // cover-fit camera frame
- let vr=video.videoWidth/video.videoHeight,cr=c.width/c.height,sx=0,sy=0,sw=video.videoWidth,sh=video.videoHeight;
- if(vr>cr){sw=video.videoHeight*cr;sx=(video.videoWidth-sw)/2}else{sh=video.videoWidth/cr;sy=(video.videoHeight-sh)/2}
- x.drawImage(video,sx,sy,sw,sh,0,0,c.width,c.height);x.drawImage(canvas,0,0);
- c.toBlob(blob=>{let a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='camera-measure.png';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)},'image/png');pop('Measurement photo saved');
-};
+const $=s=>document.querySelector(s),v=$('#cam'),c=$('#cv'),x=c.getContext('2d');
+let stream,face='environment',pts=[],scale=+localStorage.measureScale||0,unit=localStorage.measureUnit||'ftin',calPts=[],calibrating=false;
+function resize(){c.width=innerWidth*devicePixelRatio;c.height=innerHeight*devicePixelRatio;draw()} addEventListener('resize',resize);resize();
+async function start(){try{if(stream)stream.getTracks().forEach(t=>t.stop());stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:face},width:{ideal:1920},height:{ideal:1080}},audio:false});v.srcObject=stream;await v.play();$('#start').classList.add('hidden');update()}catch(e){alert('Please allow camera access, then reload the page.')}}
+$('#startBtn').onclick=start;
+const center=()=>({x:c.width/2,y:c.height/2}),dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
+function fraction(n){let w=Math.floor(n),e=Math.round((n-w)*8);if(e===8){w++;e=0}return w+(['','⅛','¼','⅜','½','⅝','¾','⅞'][e]||'')}
+function format(inches){if(unit==='cm')return (inches*2.54).toFixed(1)+' cm';if(unit==='in')return fraction(inches)+'″';let ft=Math.floor(inches/12),rem=inches-ft*12;return ft?`${ft}′ ${fraction(rem)}″`:`${fraction(rem)}″`}
+function label(){if(pts.length<2)return'';return scale?format(dist(pts[0],pts[1])/scale):Math.round(dist(pts[0],pts[1])/devicePixelRatio)+' px'}
+function update(){if(calibrating)return;$('#instruction').textContent=pts.length===0?'Aim at first edge':pts.length===1?'Aim at second edge':'Measurement complete';$('#status').textContent=pts.length===2?(scale?label():'Pixel distance only · calibrate for inches'):scale?'Tap + to mark a point':'Calibrate once for real measurements';$('#units').textContent='Units · '+(unit==='ftin'?'feet & inches':unit==='in'?'inches':'centimeters');draw()}
+function rr(ctx,a,b,w,h,r){ctx.beginPath();ctx.roundRect(a,b,w,h,r)}
+function draw(){x.clearRect(0,0,c.width,c.height);if(!pts.length)return;x.save();x.lineWidth=4*devicePixelRatio;x.strokeStyle=x.fillStyle='#fff';x.shadowColor='rgba(0,0,0,.7)';x.shadowBlur=8*devicePixelRatio;pts.forEach(p=>{x.beginPath();x.arc(p.x,p.y,7*devicePixelRatio,0,Math.PI*2);x.fill()});if(pts.length===2){x.beginPath();x.moveTo(pts[0].x,pts[0].y);x.lineTo(pts[1].x,pts[1].y);x.stroke();let t=label(),mx=(pts[0].x+pts[1].x)/2,my=(pts[0].y+pts[1].y)/2;x.font=`800 ${20*devicePixelRatio}px system-ui`;let w=x.measureText(t).width+26*devicePixelRatio;x.shadowBlur=0;x.fillStyle='rgba(5,7,10,.84)';rr(x,mx-w/2,my-46*devicePixelRatio,w,36*devicePixelRatio,11*devicePixelRatio);x.fill();x.fillStyle='#fff';x.textAlign='center';x.fillText(t,mx,my-20*devicePixelRatio)}x.restore()}
+function pop(t){$('#toast').textContent=t;$('#toast').classList.add('show');setTimeout(()=>$('#toast').classList.remove('show'),700)}
+$('#add').onclick=()=>{if(pts.length===2)pts=[];pts.push(center());if(navigator.vibrate)navigator.vibrate(20);pop(pts.length===1?'First edge marked':'Measured');update()}
+$('#undo').onclick=()=>{pts.pop();update()};$('#clear').onclick=()=>{pts=[];update();pop('Cleared')};
+$('#menuBtn').onclick=()=>$('#menu').classList.add('open');$('#close').onclick=()=>$('#menu').classList.remove('open');
+$('#units').onclick=()=>{unit=unit==='ftin'?'in':unit==='in'?'cm':'ftin';localStorage.measureUnit=unit;update()};
+$('#flip').onclick=async()=>{face=face==='environment'?'user':'environment';$('#menu').classList.remove('open');await start()};
+$('#cal').onclick=()=>{$('#menu').classList.remove('open');$('#calSheet').classList.add('open');calPts=[];calibrating=true;$('#calHelp').innerHTML='<b>Step 1 of 2:</b> Aim the center + at the card\\'s left edge.';$('#calPoint').textContent='Mark left edge';$('#instruction').textContent='Aim at card left edge'};
+$('#cancelCal').onclick=()=>{calibrating=false;calPts=[];$('#calSheet').classList.remove('open');update()};
+$('#calPoint').onclick=()=>{calPts.push(center());if(calPts.length===1){$('#calHelp').innerHTML='<b>Step 2 of 2:</b> Move the center + to the card\\'s right edge.';$('#calPoint').textContent='Mark right edge';$('#instruction').textContent='Aim at card right edge'}else{scale=dist(calPts[0],calPts[1])/(85.60/25.4);localStorage.measureScale=scale;calibrating=false;calPts=[];$('#calSheet').classList.remove('open');pts=[];pop('Calibration saved');update()}};
 update();
-</script>
-</body>
-</html>
+</script></body></html>
