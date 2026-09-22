@@ -4,7 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="theme-color" content="#0b0e12">
-<title>Cut Measure</title>
+<meta name="application-name" content="CutMark">
+<meta name="apple-mobile-web-app-title" content="CutMark">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="description" content="CutMark helps craftspeople measure, adjust, save, and work through accurate cut lists.">
+<title>CutMark — Measure it. Mark it. Cut it.</title>
 <style>
 :root{
   --bg:#0b0e12;--surface:#151a21;--surface-2:#1d232c;--line:#2a323d;
@@ -55,7 +60,7 @@ button,input,select{font:inherit}button{cursor:pointer}button:disabled{opacity:.
   <main>
     <section id="measureScreen" class="screen is-active">
       <header class="topbar">
-        <div><div class="brand">Cut Measure</div><div id="jobLabel" class="muted small">Current job</div></div>
+        <div><div class="brand">CutMark</div><div id="jobLabel" class="muted small">Current job</div></div>
         <button id="calibrateButton" class="btn">Calibrate</button>
       </header>
 
@@ -134,14 +139,14 @@ button,input,select{font:inherit}button{cursor:pointer}button:disabled{opacity:.
   </section>
 
   <section id="startScreen" class="start">
-    <div class="start__body"><div class="logo">↔</div><h1>Cut Measure</h1><p>Measure an opening, account for fit, and carry the correct cut to the saw.</p><button id="startButton" class="btn btn--primary btn--wide">Start measuring</button><p class="small">For critical work, enter your tape or laser measurement exactly.</p></div>
+    <div class="start__body"><div class="logo">↔</div><h1>CutMark</h1><p>Measure an opening, account for fit, and carry the correct cut to the saw.</p><button id="startButton" class="btn btn--primary btn--wide">Start measuring</button><p class="small">For critical work, enter your tape or laser measurement exactly.</p></div>
   </section>
   <div id="toast" class="toast" role="status"></div>
 </div>
 
 <script type="module">
 /*
-  Cut Measure — single-file prototype with production-friendly boundaries.
+  CutMark — single-file prototype with production-friendly boundaries.
 
   Architecture:
     Storage       persistent app state + schema migration
