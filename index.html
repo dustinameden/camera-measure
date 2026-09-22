@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Camera Measure</title>
+  <style>
+:root { font-family: Inter, system-ui, sans-serif; color-scheme: dark; }
+* { box-sizing: border-box; }
+body { margin: 0; background: #0b0d10; color: #f5f7fa; }
+.app { max-width: 1180px; margin: 0 auto; padding: 22px; }
+header { display:flex; justify-content:space-between; gap:16px; align-items:center; }
+h1 { margin:0; font-size:28px; } header p { margin:5px 0 0; color:#aeb7c2; }
+.status { padding:8px 12px; border:1px solid #303844; border-radius:999px; color:#c7d0db; }
+.toolbar { display:flex; flex-wrap:wrap; gap:10px; margin:18px 0; align-items:center; }
+button, select, input { font:inherit; border-radius:9px; border:1px solid #394350; background:#171c22; color:#fff; padding:9px 12px; }
+button { cursor:pointer; } button:disabled { opacity:.4; cursor:not-allowed; }
+button.active { outline:2px solid #fff; }
+label { display:flex; gap:8px; align-items:center; color:#cbd3dd; }
+.viewer { position:relative; width:100%; min-height:360px; background:#050607; border:1px solid #29313a; border-radius:16px; overflow:hidden; aspect-ratio:16/9; }
+video, canvas { position:absolute; inset:0; width:100%; height:100%; object-fit:contain; }
+canvas { cursor:crosshair; touch-action:none; }
+.hint { position:absolute; left:50%; bottom:18px; transform:translateX(-50%); background:rgba(0,0,0,.68); padding:9px 13px; border-radius:10px; pointer-events:none; text-align:center; }
+.panel { margin-top:16px; display:grid; gap:8px; padding:16px; border:1px solid #29313a; border-radius:14px; background:#11151a; }
+.note { margin:4px 0 0; color:#9da7b3; font-size:14px; }
+dialog { border:1px solid #394350; border-radius:14px; background:#11151a; color:#fff; width:min(440px, 90vw); }
+dialog::backdrop { background:rgba(0,0,0,.65); }
+.row { display:flex; gap:8px; }.row input { flex:1; }.dialog-actions { display:flex; justify-content:flex-end; gap:8px; margin-top:18px; }
+@media (max-width:600px){ .app{padding:12px} header{align-items:flex-start} .viewer{min-height:280px} }
+
+</style>
+</head>
+<body>
+  <main class="app">
+    <header>
+      <div><h1>Camera Measure</h1><p>Calibrate once, then click two points to measure.</p></div>
+      <div class="status" id="status">Camera off</div>
+    </header>
+
+    <section class="toolbar">
+      <button id="startBtn">Start camera</button>
+      <button id="switchBtn" disabled>Switch camera</button>
+      <button id="calibrateBtn" disabled>Calibrate</button>
+      <button id="measureBtn" disabled>Measure</button>
+      <button id="undoBtn" disabled>Undo</button>
+      <button id="clearBtn" disabled>Clear</button>
+      <label>Units
+        <select id="unitSelect"><option value="in">in</option><option value="cm">cm</option><option value="mm">mm</option></select>
+      </label>
+    </section>
+
+    <section class="viewer" id="viewer">
+      <video id="video" autoplay playsinline muted></video>
+      <canvas id="overlay"></canvas>
+      <div class="hint" id="hint">Start the camera to begin.</div>
+    </section>
+
+    <section class="panel">
+      <div><strong>Standalone web app:</strong> This single HTML file contains all CSS and JavaScript.</div>
+      <div><strong>Calibration:</strong> <span id="calibrationText">Not calibrated</span></div>
+      <div><strong>Latest measurement:</strong> <span id="latestText">—</span></div>
+      <p class="note">Accuracy depends on calibration and perspective. Keep the reference and measured object on roughly the same plane and distance from the camera.</p>
+    </section>
+  </main>
+
+  <dialog id="calibrationDialog">
+    <form method="dialog" id="calibrationForm">
+      <h2>Set reference length</h2>
+      <p>After entering a known real-world length, click its two endpoints in the camera view.</p>
+      <div class="row">
+        <input id="referenceLength" type="number" min="0.001" step="any" value="8.5" required />
+        <select id="referenceUnit"><option value="in">inches</option><option value="cm">cm</option><option value="mm">mm</option></select>
+      </div>
+      <div class="dialog-actions"><button value="cancel">Cancel</button><button id="confirmCalibration" value="default">Use reference</button></div>
+    </form>
+  </dialog>
+
+  <script>
+const video = document.querySelector('#video');
+const canvas = document.querySelector('#overlay');
+const ctx = canvas.getContext('2d');
+const startBtn = document.querySelector('#startBtn');
+const switchBtn = document.querySelector('#switchBtn');
+const calibrateBtn = document.querySelector('#calibrateBtn');
+const measureBtn = document.querySelector('#measureBtn');
+const undoBtn = document.querySelector('#undoBtn');
+const clearBtn = document.querySelector('#clearBtn');
+const unitSelect = document.querySelector('#unitSelect');
+const hint = document.querySelector('#hint');
+const status = document.querySelector('#status');
+const calibrationText = document.querySelector('#calibrationText');
+const latestText = document.querySelector('#latestText');
+const dialog = document.querySelector('#calibrationDialog');
+const calibrationForm = document.querySelector('#calibrationForm');
+const referenceLength = document.querySelector('#referenceLength');
+const referenceUnit = document.querySelector('#referenceUnit');
+
+let stream = null;
+let facingMode = 'environment';
+let mode = 'idle';
+let pending = [];
+let measurements = [];
+let pixelsPerMm = null;
+let calibrationSegment = null;
+let calibrationValueMm = null;
+
+const toMm = (v,u) => u === 'in' ? v*25.4 : u === 'cm' ? v*10 : v;
+const fromMm = (v,u) => u === 'in' ? v/25.4 : u === 'cm' ? v/10 : v;
+const fmt = v => v >= 100 ? v.toFixed(1) : v.toFixed(2);
+
+function resizeCanvas(){
+  const r = canvas.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = Math.round(r.width*dpr); canvas.height = Math.round(r.height*dpr);
+  ctx.setTransform(dpr,0,0,dpr,0,0); draw();
+}
+function pointFromEvent(e){
+  const r = canvas.getBoundingClientRect();
+  return {x:e.clientX-r.left, y:e.clientY-r.top};
+}
+function dist(a,b){ return Math.hypot(b.x-a.x,b.y-a.y); }
+function drawSegment(a,b,label,kind='measure'){
+  ctx.save();
+  ctx.lineWidth=3; ctx.strokeStyle = kind==='cal' ? '#ffd166' : '#5eead4'; ctx.fillStyle=ctx.strokeStyle;
+  ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
+  for(const p of [a,b]){ctx.beginPath();ctx.arc(p.x,p.y,6,0,Math.PI*2);ctx.fill();}
+  if(label){
+    const mx=(a.x+b.x)/2, my=(a.y+b.y)/2;
+    ctx.font='600 16px system-ui'; const w=ctx.measureText(label).width+16;
+    ctx.fillStyle='rgba(0,0,0,.72)'; ctx.fillRect(mx-w/2,my-27,w,25);
+    ctx.fillStyle='#fff'; ctx.textAlign='center'; ctx.fillText(label,mx,my-9);
+  }
+  ctx.restore();
+}
+function draw(){
+  const r=canvas.getBoundingClientRect(); ctx.clearRect(0,0,r.width,r.height);
+  if(calibrationSegment) drawSegment(calibrationSegment[0],calibrationSegment[1],'reference','cal');
+  for(const m of measurements){ const u=unitSelect.value; drawSegment(m.a,m.b,`${fmt(fromMm(m.mm,u))} ${u}`); }
+  if(pending.length===1){ ctx.fillStyle=mode==='calibrate'?'#ffd166':'#5eead4';ctx.beginPath();ctx.arc(pending[0].x,pending[0].y,6,0,Math.PI*2);ctx.fill(); }
+}
+async function startCamera(){
+  if(stream) stream.getTracks().forEach(t=>t.stop());
+  try {
+    stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:facingMode}},audio:false});
+    video.srcObject=stream; await video.play();
+    status.textContent='Camera on'; startBtn.textContent='Restart camera';
+    switchBtn.disabled=false; calibrateBtn.disabled=false; clearBtn.disabled=false;
+    hint.textContent=pixelsPerMm?'Choose Measure and click two points.':'Calibrate with a known-length object first.';
+    resizeCanvas();
+  } catch(err){ status.textContent='Camera blocked'; hint.textContent='Camera permission is required. Allow camera access, then try again.'; console.error(err); }
+}
+startBtn.addEventListener('click',startCamera);
+switchBtn.addEventListener('click',async()=>{facingMode=facingMode==='environment'?'user':'environment';await startCamera();});
+calibrateBtn.addEventListener('click',()=>dialog.showModal());
+calibrationForm.addEventListener('submit',(e)=>{
+  if(e.submitter?.value==='cancel') return;
+  const n=Number(referenceLength.value); if(!(n>0)){e.preventDefault();return;}
+  calibrationValueMm=toMm(n,referenceUnit.value); mode='calibrate'; pending=[];
+  calibrateBtn.classList.add('active'); measureBtn.classList.remove('active');
+  hint.textContent='Calibration: click the two endpoints of your known-length reference.';
+});
+measureBtn.addEventListener('click',()=>{mode='measure';pending=[];measureBtn.classList.add('active');calibrateBtn.classList.remove('active');hint.textContent='Measurement: click two points on the same plane as your reference.';draw();});
+canvas.addEventListener('pointerdown',(e)=>{
+  if(!stream || !['calibrate','measure'].includes(mode)) return;
+  pending.push(pointFromEvent(e));
+  if(pending.length===2){
+    const px=dist(pending[0],pending[1]);
+    if(px<3){pending=[];draw();return;}
+    if(mode==='calibrate'){
+      pixelsPerMm=px/calibrationValueMm; calibrationSegment=[pending[0],pending[1]];
+      calibrationText.textContent=`${fmt(fromMm(calibrationValueMm,referenceUnit.value))} ${referenceUnit.value} reference`;
+      measureBtn.disabled=false; undoBtn.disabled=false; hint.textContent='Calibrated. Choose Measure, then click two points.'; mode='idle'; calibrateBtn.classList.remove('active');
+    } else if(pixelsPerMm){
+      const mm=px/pixelsPerMm; measurements.push({a:pending[0],b:pending[1],mm});
+      const u=unitSelect.value; latestText.textContent=`${fmt(fromMm(mm,u))} ${u}`; undoBtn.disabled=false; pending=[];
+    }
+    pending=[];
+  }
+  draw();
+});
+undoBtn.addEventListener('click',()=>{ if(measurements.length) measurements.pop(); else if(calibrationSegment){calibrationSegment=null;pixelsPerMm=null;measureBtn.disabled=true;calibrationText.textContent='Not calibrated';} latestText.textContent=measurements.length?`${fmt(fromMm(measurements.at(-1).mm,unitSelect.value))} ${unitSelect.value}`:'—'; draw(); });
+clearBtn.addEventListener('click',()=>{measurements=[];pending=[];latestText.textContent='—';draw();});
+unitSelect.addEventListener('change',()=>{ if(measurements.length){const m=measurements.at(-1);latestText.textContent=`${fmt(fromMm(m.mm,unitSelect.value))} ${unitSelect.value}`;} draw(); });
+window.addEventListener('resize',resizeCanvas);
+video.addEventListener('loadedmetadata',resizeCanvas);
+
+</script>
+</body>
+</html>
