@@ -3,106 +3,592 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
-<meta name="theme-color" content="#0a0c0f">
+<meta name="theme-color" content="#0b0e12">
 <title>Cut Measure</title>
 <style>
+:root{
+  --bg:#0b0e12;--surface:#151a21;--surface-2:#1d232c;--line:#2a323d;
+  --text:#f7f8fa;--muted:#9ba6b3;--radius:18px;--safe-b:env(safe-area-inset-bottom);
+  --tap:52px;--max:640px;
+}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;width:100%;height:100%;background:#0a0c0f;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-button,input,select{font:inherit}
-#app{min-height:100dvh;max-width:600px;margin:auto;background:#0a0c0f;position:relative;overflow:hidden}
-.screen{display:none;min-height:100dvh;padding-bottom:92px}.screen.active{display:block}
-header{height:64px;padding:calc(env(safe-area-inset-top) + 10px) 16px 8px;display:flex;align-items:center;justify-content:space-between}
-.brand{font-weight:900;letter-spacing:-.04em;font-size:19px}.jobname{font-size:12px;color:#9ba4b0}
-.camera{height:53dvh;min-height:390px;position:relative;background:radial-gradient(circle at 50% 40%,#202a35,#080a0d 70%);overflow:hidden}
-video,canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}canvas{touch-action:none}
-.scrim{position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(0,0,0,.35),transparent 25%,transparent 68%,rgba(0,0,0,.5))}
-.cross{position:absolute;left:50%;top:50%;width:42px;height:42px;transform:translate(-50%,-50%);filter:drop-shadow(0 2px 4px #000);pointer-events:none}
-.cross:before,.cross:after{content:"";position:absolute;background:#fff}.cross:before{width:2px;height:42px;left:20px}.cross:after{height:2px;width:42px;top:20px}.cross i{position:absolute;inset:14px;border:2px solid #fff;border-radius:50%}
-.guide{position:absolute;top:16px;left:50%;transform:translateX(-50%);padding:8px 13px;border-radius:999px;background:rgba(7,9,12,.68);backdrop-filter:blur(12px);font-size:13px;font-weight:800;white-space:nowrap}
-.camrow{position:absolute;left:0;right:0;bottom:16px;display:grid;grid-template-columns:48px 1fr 48px;align-items:center;padding:0 18px;gap:16px}
-.glass{border:1px solid rgba(255,255,255,.2);background:rgba(7,9,12,.64);backdrop-filter:blur(12px);color:white}
-.circle{height:48px;border-radius:50%;font-size:20px}
-.mark{justify-self:center;width:72px;height:72px;border-radius:50%;border:5px solid #fff;background:rgba(255,255,255,.18);position:relative}.mark:after{content:"+";position:absolute;inset:5px;border-radius:50%;background:#fff;color:#080a0d;display:grid;place-items:center;font-size:34px}
-.panel{padding:14px 16px 20px}
-.measurebox{background:#151a21;border:1px solid #252c35;border-radius:20px;padding:14px 15px}
-.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#8f99a6;font-weight:800}
-.measure{font-size:34px;font-weight:900;letter-spacing:-.05em;margin-top:2px}.sub{font-size:13px;color:#9fa8b3;margin-top:2px}
-.manual{display:flex;gap:8px;margin-top:12px}.manual input{min-width:0;flex:1;border:1px solid #333b46;background:#0d1116;color:#fff;border-radius:12px;padding:11px}.btn{border:0;border-radius:13px;padding:12px 14px;background:#2a313a;color:#fff;font-weight:800}.btn.primary{background:#fff;color:#080a0d}
-.adjust{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:12px}.adjust button{padding:10px 4px;border:1px solid #333b46;border-radius:11px;background:#11161c;color:#fff;font-weight:750}
-.cutcard{margin-top:12px;padding:14px;border-radius:18px;background:#f3f5f7;color:#0b0d10}.cutline{display:flex;justify-content:space-between;align-items:end}.cutvalue{font-size:37px;font-weight:950;letter-spacing:-.05em}.allow{font-size:12px;color:#5f6874}
-.actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}.actions button{height:50px}
-nav{position:fixed;z-index:20;left:50%;bottom:0;transform:translateX(-50%);width:min(600px,100%);padding:8px 12px calc(env(safe-area-inset-bottom) + 8px);background:rgba(10,12,15,.94);backdrop-filter:blur(16px);border-top:1px solid #222831;display:grid;grid-template-columns:repeat(3,1fr)}
-nav button{border:0;background:none;color:#808a97;padding:8px;font-size:12px;font-weight:800}nav button.active{color:#fff}nav span{display:block;font-size:20px;margin-bottom:2px}
-.list{padding:8px 16px 24px}.listhead{display:flex;justify-content:space-between;align-items:center;margin:8px 0 14px}.listhead h1{margin:0;font-size:27px}.item{display:grid;grid-template-columns:38px 1fr auto;gap:10px;align-items:center;padding:14px 0;border-bottom:1px solid #242a32}.letter{width:34px;height:34px;border-radius:10px;background:#20262e;display:grid;place-items:center;font-weight:900}.item strong{font-size:20px}.item small{display:block;color:#8f99a6;margin-top:2px}.check{width:28px;height:28px;border:1px solid #48515d;border-radius:50%;background:none;color:#fff}.check.done{background:#fff;color:#080a0d}
-.settings{padding:10px 16px 30px}.settings h1{font-size:27px}.field{margin:16px 0}.field label{display:block;color:#9da6b1;font-size:12px;font-weight:800;margin-bottom:6px}.field input,.field select{width:100%;border:1px solid #333b46;background:#11161c;color:#fff;border-radius:13px;padding:13px}
-.notice{padding:13px;border-radius:14px;background:#171d24;color:#aeb7c2;font-size:13px;line-height:1.45}
-#start{position:absolute;z-index:50;inset:0;min-height:100dvh;display:grid;place-items:center;padding:26px;background:radial-gradient(circle at 50% 30%,#1d2a38,#080a0d 68%)}
-.start{text-align:center;max-width:410px}.start h1{font-size:36px;letter-spacing:-.05em;margin:16px 0 8px}.start p{color:#b3bdc8;line-height:1.5}.start button{width:100%;height:58px;border:0;border-radius:17px;background:#fff;color:#080a0d;font-weight:900;font-size:18px}.logo{width:72px;height:72px;border-radius:23px;background:#fff;color:#080a0d;margin:auto;display:grid;place-items:center;font-size:32px;font-weight:950}
-.sheet{position:fixed;z-index:40;left:50%;bottom:0;transform:translate(-50%,110%);width:min(600px,100%);padding:18px 16px calc(env(safe-area-inset-bottom) + 18px);background:#181d24;border-radius:24px 24px 0 0;transition:.23s;box-shadow:0 -20px 60px #000}.sheet.open{transform:translate(-50%,0)}.sheet h2{margin:0 0 7px}.sheet p{color:#adb6c1;font-size:14px;line-height:1.45}.cardshape{width:220px;aspect-ratio:1.586;border:2px dashed #7e8996;border-radius:13px;margin:14px auto;display:grid;place-items:center;color:#9ca6b2}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+button,input,select{font:inherit}button{cursor:pointer}button:disabled{opacity:.45;cursor:default}
+.app{max-width:var(--max);min-height:100dvh;margin:auto;background:var(--bg);position:relative}
+.screen{display:none;min-height:100dvh;padding-bottom:88px}.screen.is-active{display:block}
+.topbar{height:64px;padding:calc(env(safe-area-inset-top) + 8px) 16px 8px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{font-size:19px;font-weight:900;letter-spacing:-.04em}.muted{color:var(--muted)}.small{font-size:12px}
+.btn{min-height:44px;border:0;border-radius:13px;padding:10px 14px;background:#29313b;color:#fff;font-weight:800}
+.btn--primary{background:#fff;color:#0b0e12}.btn--wide{width:100%;min-height:54px;font-size:17px}
+.camera{height:52dvh;min-height:380px;position:relative;overflow:hidden;background:radial-gradient(circle at 50% 38%,#223040,#07090c 72%)}
+.camera video,.camera canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.camera canvas{touch-action:none}
+.camera::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(0,0,0,.3),transparent 25%,transparent 68%,rgba(0,0,0,.55))}
+.guide{position:absolute;z-index:3;top:15px;left:50%;transform:translateX(-50%);padding:8px 13px;border-radius:999px;background:rgba(5,7,10,.72);backdrop-filter:blur(10px);font-size:13px;font-weight:850;white-space:nowrap}
+.crosshair{position:absolute;z-index:3;left:50%;top:50%;width:44px;height:44px;transform:translate(-50%,-50%);pointer-events:none;filter:drop-shadow(0 2px 4px #000)}
+.crosshair::before,.crosshair::after{content:"";position:absolute;background:#fff}.crosshair::before{width:2px;height:44px;left:21px}.crosshair::after{height:2px;width:44px;top:21px}
+.camera-actions{position:absolute;z-index:4;left:0;right:0;bottom:16px;display:grid;grid-template-columns:52px 1fr 52px;align-items:center;padding:0 18px;gap:16px}
+.icon-btn{width:52px;height:52px;border-radius:50%;border:1px solid rgba(255,255,255,.22);background:rgba(5,7,10,.68);color:#fff;font-size:20px}
+.mark-btn{justify-self:center;width:74px;height:74px;border-radius:50%;border:5px solid #fff;background:rgba(255,255,255,.16);position:relative}
+.mark-btn::after{content:"+";position:absolute;inset:5px;border-radius:50%;display:grid;place-items:center;background:#fff;color:#080a0d;font-size:34px}
+.content{padding:14px 16px 24px}.card{padding:14px 15px;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius)}
+.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#8f9aa7;font-weight:850}.value{font-size:35px;font-weight:950;letter-spacing:-.05em;margin-top:2px}
+.input-row{display:flex;gap:8px;margin-top:12px}.input,.select{width:100%;min-width:0;border:1px solid #343e4a;background:#0f1318;color:#fff;border-radius:12px;padding:12px}
+.adjustments{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:11px}.adjustments button{padding:10px 3px;border:1px solid #343e4a;border-radius:11px;background:#11161c;color:#fff;font-weight:800}
+.cut-card{margin-top:12px;padding:14px;border-radius:var(--radius);background:#f3f5f7;color:#0b0e12}.cut-row{display:flex;justify-content:space-between;align-items:end;gap:12px}.cut-value{font-size:38px;font-weight:950;letter-spacing:-.05em}
+.field{margin:13px 0}.field label{display:block;margin-bottom:6px;color:#9ba6b3;font-size:12px;font-weight:850}
+.bottom-nav{position:fixed;z-index:20;left:50%;bottom:0;transform:translateX(-50%);width:min(var(--max),100%);display:grid;grid-template-columns:repeat(3,1fr);padding:8px 12px calc(var(--safe-b) + 8px);background:rgba(10,13,17,.95);backdrop-filter:blur(16px);border-top:1px solid #242b34}
+.bottom-nav button{border:0;background:none;color:#7f8a97;padding:7px;font-size:12px;font-weight:850}.bottom-nav button.is-active{color:#fff}.bottom-nav span{display:block;font-size:20px}
+.list{padding:8px 16px 24px}.list-header{display:flex;justify-content:space-between;align-items:center;margin:8px 0 12px}.list-header h1,.settings h1{margin:0;font-size:27px}
+.cut-item{display:grid;grid-template-columns:38px 1fr auto;gap:10px;align-items:center;padding:14px 0;border-bottom:1px solid #242b34}.cut-item strong{font-size:20px}.cut-item small{display:block;margin-top:3px;color:#8f9aa7}
+.check{width:30px;height:30px;border-radius:50%;border:1px solid #4b5663;background:none;color:#fff}.check.is-done{background:#fff;color:#0b0e12}
+.settings{padding:10px 16px 28px}.notice{padding:13px;border-radius:14px;background:#171d24;color:#afb9c4;font-size:13px;line-height:1.45}
+.start{position:absolute;z-index:100;inset:0;min-height:100dvh;display:grid;place-items:center;padding:26px;background:radial-gradient(circle at 50% 28%,#1f2c3b,#080a0d 70%)}
+.start__body{text-align:center;max-width:410px}.start h1{font-size:36px;letter-spacing:-.05em;margin:16px 0 8px}.start p{color:#b2bdc9;line-height:1.5}.logo{width:72px;height:72px;margin:auto;border-radius:23px;background:#fff;color:#0b0e12;display:grid;place-items:center;font-size:32px;font-weight:950}
+.sheet{position:fixed;z-index:50;left:50%;bottom:0;transform:translate(-50%,110%);width:min(var(--max),100%);padding:18px 16px calc(var(--safe-b) + 18px);background:#181e25;border-radius:24px 24px 0 0;box-shadow:0 -20px 60px #000;transition:.22s}.sheet.is-open{transform:translate(-50%,0)}
+.sheet h2{margin:0 0 7px}.sheet p{color:#adb7c2;font-size:14px;line-height:1.45}.reference-card{width:220px;aspect-ratio:1.586;margin:14px auto;border:2px dashed #7f8a97;border-radius:13px;display:grid;place-items:center;color:#9da8b4}
+.toast{position:fixed;z-index:80;left:50%;bottom:92px;transform:translate(-50%,18px);padding:10px 14px;border-radius:999px;background:#fff;color:#0b0e12;font-weight:850;opacity:0;pointer-events:none;transition:.2s}.toast.is-visible{opacity:1;transform:translate(-50%,0)}
 .hidden{display:none!important}
 </style>
 </head>
-<body><div id="app">
-<section id="measureScreen" class="screen active">
-<header><div><div class="brand">Cut Measure</div><div class="jobname" id="jobLabel">Current job</div></div><button id="calBtn" class="btn">Calibrate</button></header>
-<div class="camera"><video id="cam" autoplay playsinline muted></video><canvas id="cv"></canvas><div class="scrim"></div><div class="guide" id="guide">Mark first edge</div><div class="cross"><i></i></div>
-<div class="camrow"><button id="undo" class="glass circle">↶</button><button id="mark" class="mark"></button><button id="flip" class="glass circle">↻</button></div></div>
-<div class="panel"><div class="measurebox"><div class="eyebrow">Measured opening</div><div id="opening" class="measure">—</div><div id="measureNote" class="sub">Mark two points, or enter a tape/laser measurement.</div>
-<div class="manual"><input id="manualInput" placeholder='e.g. 46 1/2 or 3ft 10 1/2'><button id="useManual" class="btn">Use exact</button></div></div>
-<div class="adjust"><button data-adj="-0.125">−⅛″</button><button data-adj="-0.0625">−1/16″</button><button data-adj="0.0625">+1/16″</button><button data-adj="0.125">+⅛″</button></div>
-<div class="cutcard"><div class="eyebrow" style="color:#5d6671">CUT THIS</div><div class="cutline"><div id="cut" class="cutvalue">—</div><div id="allowance" class="allow">No adjustment</div></div></div>
-<div class="field" style="margin:12px 0 0"><label>PIECE / LOCATION <span style="font-weight:500;color:#737d89">(optional)</span></label><input id="pieceName" autocomplete="off" placeholder="e.g. Kitchen window — left casing"></div><div class="actions" style="grid-template-columns:1fr"><button id="saveNext" class="btn primary">Save &amp; next cut</button></div></div>
-</section>
+<body>
+<div class="app">
+  <main>
+    <section id="measureScreen" class="screen is-active">
+      <header class="topbar">
+        <div><div class="brand">Cut Measure</div><div id="jobLabel" class="muted small">Current job</div></div>
+        <button id="calibrateButton" class="btn">Calibrate</button>
+      </header>
 
-<section id="listScreen" class="screen"><header><div class="brand">Cut List</div><button id="clearList" class="btn">Clear</button></header><div class="list"><div class="listhead"><h1 id="listTitle">Current job</h1><span id="count">0 cuts</span></div><div id="items"></div></div></section>
-<section id="jobScreen" class="screen"><header><div class="brand">Job</div></header><div class="settings"><h1>Job setup</h1>
-<div class="field"><label>JOB / ROOM NAME</label><input id="jobName" placeholder="Kitchen trim"></div>
-<div class="field"><label>ROUND CUTS TO</label><select id="precision"><option value="16">Nearest 1/16″</option><option value="8" selected>Nearest 1/8″</option><option value="4">Nearest 1/4″</option></select></div>
-<div class="field"><label>DEFAULT FIT ALLOWANCE</label><select id="defaultAllowance"><option value="0">No adjustment</option><option value="-0.0625">−1/16″</option><option value="-0.125">−1/8″</option><option value="-0.25">−1/4″</option></select></div>
-<div class="notice"><b>Precision note:</b> camera measurement is reference-calibrated and can shift with distance/perspective. For critical finish cuts, use the tape/laser field to enter the exact dimension; Cut Measure will still handle the allowance and cut list.</div></div></section>
+      <div class="camera">
+        <video id="cameraVideo" autoplay playsinline muted></video>
+        <canvas id="measureCanvas"></canvas>
+        <div id="guide" class="guide">Mark first edge</div>
+        <div class="crosshair"></div>
+        <div class="camera-actions">
+          <button id="undoButton" class="icon-btn" aria-label="Undo point">↶</button>
+          <button id="markButton" class="mark-btn" aria-label="Mark measurement point"></button>
+          <button id="flipButton" class="icon-btn" aria-label="Switch camera">↻</button>
+        </div>
+      </div>
 
-<nav><button data-screen="measureScreen" class="active"><span>⊕</span>Measure</button><button data-screen="listScreen"><span>☷</span>Cut list</button><button data-screen="jobScreen"><span>▣</span>Job</button></nav>
+      <div class="content">
+        <section class="card">
+          <div class="eyebrow">Measured opening</div>
+          <div id="openingValue" class="value">—</div>
+          <div id="measurementStatus" class="muted small">Mark two points, or enter a tape/laser measurement.</div>
+          <div class="input-row">
+            <input id="manualMeasurement" class="input" inputmode="decimal" placeholder='46 1/2 or 3ft 10 1/2'>
+            <button id="useExactButton" class="btn">Use exact</button>
+          </div>
+        </section>
 
-<section id="calSheet" class="sheet"><h2>Quick camera calibration</h2><p>Hold a standard credit card flat against the same surface you're measuring. Mark its long edge (85.60 mm).</p><div class="cardshape">credit card · long edge</div><p id="calHelp"><b>1.</b> Aim the + at the left edge.</p><button id="calPoint" class="btn primary" style="width:100%">Mark left edge</button><button id="cancelCal" class="btn" style="width:100%;margin-top:8px">Cancel</button></section>
+        <div class="adjustments" aria-label="Fit adjustment">
+          <button data-adjust="-0.125">−⅛″</button><button data-adjust="-0.0625">−1/16″</button>
+          <button data-adjust="0.0625">+1/16″</button><button data-adjust="0.125">+⅛″</button>
+        </div>
 
-<div id="start"><div class="start"><div class="logo">↔</div><h1>Cut Measure</h1><p>Measure an opening, adjust for fit, and save the exact cut to your job list.</p><button id="startBtn">Start measuring</button><p style="font-size:12px">For critical cuts, you can always enter your tape or laser measurement exactly.</p></div></div>
+        <section class="cut-card">
+          <div class="eyebrow">Cut this</div>
+          <div class="cut-row"><div id="cutValue" class="cut-value">—</div><div id="allowanceValue" class="muted small">No adjustment</div></div>
+        </section>
+
+        <div class="field">
+          <label for="pieceName">PIECE / LOCATION <span class="muted">(optional)</span></label>
+          <input id="pieceName" class="input" autocomplete="off" placeholder="Kitchen window — left casing">
+        </div>
+
+        <button id="saveNextButton" class="btn btn--primary btn--wide">Save &amp; next cut</button>
+      </div>
+    </section>
+
+    <section id="listScreen" class="screen">
+      <header class="topbar"><div class="brand">Cut List</div><button id="clearListButton" class="btn">Clear</button></header>
+      <div class="list"><div class="list-header"><h1 id="listTitle">Current job</h1><span id="cutCount" class="muted">0 cuts</span></div><div id="cutList"></div></div>
+    </section>
+
+    <section id="jobScreen" class="screen">
+      <header class="topbar"><div class="brand">Job</div></header>
+      <div class="settings">
+        <h1>Job setup</h1>
+        <div class="field"><label for="jobName">JOB / ROOM NAME</label><input id="jobName" class="input" placeholder="Kitchen trim"></div>
+        <div class="field"><label for="precision">ROUND CUTS TO</label><select id="precision" class="select"><option value="16">Nearest 1/16″</option><option value="8">Nearest 1/8″</option><option value="4">Nearest 1/4″</option></select></div>
+        <div class="field"><label for="defaultAllowance">DEFAULT FIT ALLOWANCE</label><select id="defaultAllowance" class="select"><option value="0">No adjustment</option><option value="-0.0625">−1/16″</option><option value="-0.125">−1/8″</option><option value="-0.25">−1/4″</option></select></div>
+        <div class="notice"><b>Precision:</b> camera measurements depend on calibration, distance, and perspective. For critical cuts, enter the tape or laser measurement exactly; the app will still handle fit and the cut list.</div>
+      </div>
+    </section>
+  </main>
+
+  <nav class="bottom-nav" aria-label="Primary navigation">
+    <button data-screen="measureScreen" class="is-active"><span>⊕</span>Measure</button>
+    <button data-screen="listScreen"><span>☷</span>Cut list</button>
+    <button data-screen="jobScreen"><span>▣</span>Job</button>
+  </nav>
+
+  <section id="calibrationSheet" class="sheet" aria-modal="true">
+    <h2>Quick calibration</h2>
+    <p>Hold a standard credit card flat against the same surface you are measuring. Its long edge is 85.60 mm.</p>
+    <div class="reference-card">credit card · long edge</div>
+    <p id="calibrationHelp"><b>1.</b> Aim the + at the left edge.</p>
+    <button id="calibrationPointButton" class="btn btn--primary btn--wide">Mark left edge</button>
+    <button id="cancelCalibrationButton" class="btn btn--wide" style="margin-top:8px">Cancel</button>
+  </section>
+
+  <section id="startScreen" class="start">
+    <div class="start__body"><div class="logo">↔</div><h1>Cut Measure</h1><p>Measure an opening, account for fit, and carry the correct cut to the saw.</p><button id="startButton" class="btn btn--primary btn--wide">Start measuring</button><p class="small">For critical work, enter your tape or laser measurement exactly.</p></div>
+  </section>
+  <div id="toast" class="toast" role="status"></div>
 </div>
-<script>
-const $=s=>document.querySelector(s),v=$('#cam'),c=$('#cv'),ctx=c.getContext('2d');
-let stream,face='environment',pts=[],scale=+localStorage.cutScale||0,openingIn=null,adjustment=0,calPts=[],calMode=false;
-let cuts=JSON.parse(localStorage.cutList||'[]');
-let job=localStorage.cutJob||'',precision=+(localStorage.cutPrecision||8),defaultAdj=+(localStorage.cutDefaultAdj||0);adjustment=defaultAdj;
-function resize(){let r=c.getBoundingClientRect();c.width=r.width*devicePixelRatio;c.height=r.height*devicePixelRatio;draw()}addEventListener('resize',resize);setTimeout(resize,50);
-async function start(){let b=$('#startBtn');b.textContent='Opening camera…';try{if(!navigator.mediaDevices?.getUserMedia)throw 0;stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:face},width:{ideal:1920},height:{ideal:1080}},audio:false});v.srcObject=stream;await v.play();$('#start').classList.add('hidden');resize()}catch(e){b.textContent='Try again';b.previousElementSibling.textContent='Camera could not open. Use the HTTPS GitHub Pages link and allow camera permission.'}}
-$('#startBtn').onclick=start;
-const center=()=>({x:c.width/2,y:c.height/2}),dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
-function gcd(a,b){return b?gcd(b,a%b):a}
-function fmt(n){if(n==null||!isFinite(n))return'—';n=Math.max(0,n);let den=precision,num=Math.round((n-Math.floor(n))*den),whole=Math.floor(n);if(num===den){whole++;num=0}let g=num?gcd(num,den):1,num2=num/g,den2=den/g;let ft=Math.floor(whole/12),inch=whole-ft*12;let frac=num?` ${num2}/${den2}`:'';return ft?`${ft}′ ${inch}${frac}″`:`${inch}${frac}″`}
-function update(){if(!calMode)$('#guide').textContent=pts.length?'Mark second edge':'Mark first edge';$('#opening').textContent=fmt(openingIn);$('#cut').textContent=fmt(openingIn==null?null:openingIn+adjustment);$('#allowance').textContent=adjustment===0?'No adjustment':`${adjustment>0?'+':''}${fractionText(adjustment)} allowance`;$('#measureNote').textContent=openingIn==null?(scale?'Camera calibrated · mark two points':'Camera needs calibration for real units, or use exact entry'):(pts.length===2?'Camera measurement':'Exact tape/laser measurement');draw()}
-function fractionText(n){let sign=n<0?'−':'',a=Math.abs(n),den=16,num=Math.round(a*den),g=gcd(num,den);return sign+(num/g)+'/'+(den/g)+'″'}
-function draw(){ctx.clearRect(0,0,c.width,c.height);if(!pts.length)return;ctx.save();ctx.strokeStyle=ctx.fillStyle='#fff';ctx.lineWidth=4*devicePixelRatio;ctx.shadowColor='#000';ctx.shadowBlur=7*devicePixelRatio;pts.forEach(p=>{ctx.beginPath();ctx.arc(p.x,p.y,7*devicePixelRatio,0,Math.PI*2);ctx.fill()});if(pts.length===2){ctx.beginPath();ctx.moveTo(pts[0].x,pts[0].y);ctx.lineTo(pts[1].x,pts[1].y);ctx.stroke();let t=fmt(openingIn),mx=(pts[0].x+pts[1].x)/2,my=(pts[0].y+pts[1].y)/2;ctx.font=`800 ${18*devicePixelRatio}px system-ui`;let w=ctx.measureText(t).width+22*devicePixelRatio;ctx.shadowBlur=0;ctx.fillStyle='rgba(6,8,11,.84)';ctx.beginPath();ctx.roundRect(mx-w/2,my-42*devicePixelRatio,w,32*devicePixelRatio,9*devicePixelRatio);ctx.fill();ctx.fillStyle='#fff';ctx.textAlign='center';ctx.fillText(t,mx,my-19*devicePixelRatio)}ctx.restore()}
-$('#mark').onclick=()=>{if(pts.length===2){pts=[];openingIn=null}pts.push(center());if(pts.length===2){openingIn=scale?dist(pts[0],pts[1])/scale:null}update()};
-$('#undo').onclick=()=>{pts.pop();if(pts.length<2)openingIn=null;update()};$('#flip').onclick=async()=>{face=face==='environment'?'user':'environment';if(stream)stream.getTracks().forEach(t=>t.stop());await start()};
-function parseMeasure(s){s=s.toLowerCase().trim().replace(/"/g,'').replace(/in(ch(es)?)?/g,'');let ft=0;if(s.includes('ft')||s.includes("'")){let parts=s.split(/ft|'/);ft=parseFloat(parts[0])||0;s=parts[1]||''}let m=s.match(/(\d+(?:\.\d+)?)?\s*(?:(\d+)\s*\/\s*(\d+))?/);if(!m)return null;let inches=parseFloat(m[1])||0;if(m[2]&&m[3])inches+=+m[2]/+m[3];let val=ft*12+inches;return val>0?val:null}
-$('#useManual').onclick=()=>{let n=parseMeasure($('#manualInput').value);if(n==null){alert('Try a measurement like 46 1/2 or 3ft 10 1/2.');return}openingIn=n;pts=[];update()};
-document.querySelectorAll('[data-adj]').forEach(b=>b.onclick=()=>{adjustment+=+b.dataset.adj;update()});
-function resetForNext(){pts=[];openingIn=null;adjustment=defaultAdj;$('#manualInput').value='';$('#pieceName').value='';update()}
-$('#saveNext').onclick=()=>{
- if(openingIn==null){alert('Measure or enter an opening first.');return}
- cuts.push({id:Date.now(),label:String.fromCharCode(65+(cuts.length%26)),name:$('#pieceName').value.trim(),opening:openingIn,adjustment,cut:openingIn+adjustment,done:false});
- localStorage.cutList=JSON.stringify(cuts);renderList();resetForNext();
- const b=$('#saveNext'),old=b.textContent;b.textContent='✓ Saved — measure next';setTimeout(()=>b.textContent=old,1100);
+
+<script type="module">
+/*
+  Cut Measure — single-file prototype with production-friendly boundaries.
+
+  Architecture:
+    Storage       persistent app state + schema migration
+    Measurements  parsing, fractions, rounding, cut calculations
+    Camera        media lifecycle only
+    Renderer      canvas drawing only
+    Store         immutable-ish state updates + subscriptions
+    App           UI events / orchestration
+
+  When the product grows, each object can move to its own module without
+  changing the rest of the application API.
+*/
+
+const CONFIG = Object.freeze({
+  storageKey: "cutMeasure.app.v2",
+  schemaVersion: 2,
+  referenceCardInches: 85.60 / 25.4,
+  defaultPrecision: 8,
+  maxCutHistory: 500
+});
+
+const $ = (selector, root = document) => root.querySelector(selector);
+const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
+
+const Storage = {
+  defaults() {
+    return {
+      version: CONFIG.schemaVersion,
+      settings: { jobName: "", precision: CONFIG.defaultPrecision, defaultAllowance: 0 },
+      calibration: { pixelsPerInch: 0 },
+      cuts: []
+    };
+  },
+
+  load() {
+    try {
+      const current = JSON.parse(localStorage.getItem(CONFIG.storageKey) || "null");
+      if (current?.version === CONFIG.schemaVersion) return { ...this.defaults(), ...current };
+
+      // Migrate data from the earlier prototype so existing users keep their work.
+      const legacyCuts = JSON.parse(localStorage.getItem("cutList") || "[]");
+      return {
+        ...this.defaults(),
+        settings: {
+          jobName: localStorage.getItem("cutJob") || "",
+          precision: Number(localStorage.getItem("cutPrecision")) || CONFIG.defaultPrecision,
+          defaultAllowance: Number(localStorage.getItem("cutDefaultAdj")) || 0
+        },
+        calibration: { pixelsPerInch: Number(localStorage.getItem("cutScale")) || 0 },
+        cuts: Array.isArray(legacyCuts) ? legacyCuts.map((cut, index) => ({
+          id: cut.id || crypto.randomUUID?.() || `${Date.now()}-${index}`,
+          label: cut.label || Measurements.alphaLabel(index),
+          name: cut.name || "",
+          opening: Number(cut.opening),
+          adjustment: Number(cut.adjustment) || 0,
+          cut: Number(cut.cut),
+          done: Boolean(cut.done),
+          createdAt: cut.createdAt || Date.now()
+        })) : []
+      };
+    } catch {
+      return this.defaults();
+    }
+  },
+
+  save(state) {
+    const persistent = {
+      version: CONFIG.schemaVersion,
+      settings: state.settings,
+      calibration: state.calibration,
+      cuts: state.cuts.slice(-CONFIG.maxCutHistory)
+    };
+    localStorage.setItem(CONFIG.storageKey, JSON.stringify(persistent));
+  }
 };
-function renderList(){let box=$('#items');box.innerHTML='';cuts.forEach((q,i)=>{let d=document.createElement('div');d.className='item';d.innerHTML=`<button class="check ${q.done?'done':''}">${q.done?'✓':''}</button><div><strong>${q.label} · ${fmt(q.cut)}</strong>${q.name?`<small style="color:#fff;font-weight:750">${q.name}</small>`:''}<small>Opening ${fmt(q.opening)} · ${q.adjustment?fractionText(q.adjustment)+' fit':'no adjustment'}</small></div><button class="btn" data-del="${i}">×</button>`;d.querySelector('.check').onclick=()=>{q.done=!q.done;localStorage.cutList=JSON.stringify(cuts);renderList()};d.querySelector('[data-del]').onclick=()=>{cuts.splice(i,1);localStorage.cutList=JSON.stringify(cuts);renderList()};box.appendChild(d)});$('#count').textContent=`${cuts.length} cut${cuts.length===1?'':'s'}`;$('#listTitle').textContent=job||'Current job'}
-$('#clearList').onclick=()=>{if(confirm('Clear the whole cut list?')){cuts=[];localStorage.cutList='[]';renderList()}};
-document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.querySelectorAll('nav button').forEach(n=>n.classList.remove('active'));$('#'+b.dataset.screen).classList.add('active');b.classList.add('active');if(b.dataset.screen==='measureScreen')setTimeout(resize,20)});
-$('#jobName').value=job;$('#precision').value=precision;$('#defaultAllowance').value=defaultAdj;
-$('#jobName').oninput=e=>{job=e.target.value;localStorage.cutJob=job;$('#jobLabel').textContent=job||'Current job';renderList()};
-$('#precision').onchange=e=>{precision=+e.target.value;localStorage.cutPrecision=precision;update();renderList()};
-$('#defaultAllowance').onchange=e=>{defaultAdj=+e.target.value;localStorage.cutDefaultAdj=defaultAdj;adjustment=defaultAdj;update()};
-$('#jobLabel').textContent=job||'Current job';
-$('#calBtn').onclick=()=>{$('#calSheet').classList.add('open');calMode=true;calPts=[];$('#calHelp').innerHTML='<b>1.</b> Aim the + at the left edge.';$('#calPoint').textContent='Mark left edge';$('#guide').textContent='Card: left edge'};
-$('#cancelCal').onclick=()=>{calMode=false;$('#calSheet').classList.remove('open');update()};
-$('#calPoint').onclick=()=>{calPts.push(center());if(calPts.length===1){$('#calHelp').innerHTML='<b>2.</b> Move the + to the right edge.';$('#calPoint').textContent='Mark right edge';$('#guide').textContent='Card: right edge'}else{scale=dist(calPts[0],calPts[1])/(85.60/25.4);localStorage.cutScale=scale;calMode=false;$('#calSheet').classList.remove('open');pts=[];openingIn=null;update()}};
-renderList();update();
-</script></body></html>
+
+const Measurements = {
+  gcd(a, b) { return b ? this.gcd(b, a % b) : a; },
+
+  alphaLabel(index) {
+    let n = index + 1, result = "";
+    while (n > 0) { n--; result = String.fromCharCode(65 + (n % 26)) + result; n = Math.floor(n / 26); }
+    return result;
+  },
+
+  format(inches, precision = 8) {
+    if (!Number.isFinite(inches)) return "—";
+    const safe = Math.max(0, inches);
+    let whole = Math.floor(safe);
+    let numerator = Math.round((safe - whole) * precision);
+    if (numerator === precision) { whole++; numerator = 0; }
+
+    const feet = Math.floor(whole / 12);
+    const remaining = whole - feet * 12;
+    let fraction = "";
+    if (numerator) {
+      const divisor = this.gcd(numerator, precision);
+      fraction = ` ${numerator / divisor}/${precision / divisor}`;
+    }
+    return feet ? `${feet}′ ${remaining}${fraction}″` : `${remaining}${fraction}″`;
+  },
+
+  formatAdjustment(value) {
+    if (!value) return "No adjustment";
+    const sign = value < 0 ? "−" : "+";
+    const abs = Math.abs(value), denominator = 16, numerator = Math.round(abs * denominator);
+    const divisor = this.gcd(numerator, denominator);
+    return `${sign}${numerator / divisor}/${denominator / divisor}″ allowance`;
+  },
+
+  parse(input) {
+    if (!input) return null;
+    let text = input.toLowerCase().trim().replace(/"/g, "").replace(/in(?:ch(?:es)?)?/g, "");
+    let feet = 0;
+    if (text.includes("ft") || text.includes("'")) {
+      const parts = text.split(/ft|'/);
+      feet = Number.parseFloat(parts[0]) || 0;
+      text = parts[1] || "";
+    }
+    const match = text.match(/(\d+(?:\.\d+)?)?\s*(?:(\d+)\s*\/\s*(\d+))?/);
+    if (!match) return null;
+    let inches = Number.parseFloat(match[1]) || 0;
+    if (match[2] && match[3]) inches += Number(match[2]) / Number(match[3]);
+    const total = feet * 12 + inches;
+    return total > 0 ? total : null;
+  }
+};
+
+const initial = Storage.load();
+const Store = {
+  state: {
+    ...initial,
+    ui: {
+      screen: "measureScreen", points: [], opening: null, source: null,
+      adjustment: initial.settings.defaultAllowance, calibrationMode: false, calibrationPoints: []
+    }
+  },
+  listeners: new Set(),
+  subscribe(fn) { this.listeners.add(fn); return () => this.listeners.delete(fn); },
+  update(mutator, { persist = true } = {}) {
+    mutator(this.state);
+    if (persist) Storage.save(this.state);
+    this.listeners.forEach(fn => fn(this.state));
+  }
+};
+
+const Camera = {
+  stream: null,
+  facingMode: "environment",
+  video: $("#cameraVideo"),
+
+  async start() {
+    if (!navigator.mediaDevices?.getUserMedia) throw new Error("Camera API unavailable");
+    this.stop();
+    this.stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: { ideal: this.facingMode }, width: { ideal: 1920 }, height: { ideal: 1080 } },
+      audio: false
+    });
+    this.video.srcObject = this.stream;
+    await this.video.play();
+  },
+
+  stop() {
+    this.stream?.getTracks().forEach(track => track.stop());
+    this.stream = null;
+  },
+
+  async flip() {
+    this.facingMode = this.facingMode === "environment" ? "user" : "environment";
+    await this.start();
+  }
+};
+
+const Canvas = {
+  el: $("#measureCanvas"),
+  ctx: $("#measureCanvas").getContext("2d"),
+
+  resize() {
+    const rect = this.el.getBoundingClientRect();
+    this.el.width = Math.max(1, rect.width * devicePixelRatio);
+    this.el.height = Math.max(1, rect.height * devicePixelRatio);
+    this.draw(Store.state);
+  },
+
+  center() { return { x: this.el.width / 2, y: this.el.height / 2 }; },
+  distance(a, b) { return Math.hypot(a.x - b.x, a.y - b.y); },
+
+  draw(state) {
+    const { ctx, el } = this;
+    const points = state.ui.points;
+    ctx.clearRect(0, 0, el.width, el.height);
+    if (!points.length) return;
+
+    ctx.save();
+    ctx.strokeStyle = ctx.fillStyle = "#fff";
+    ctx.lineWidth = 4 * devicePixelRatio;
+    ctx.shadowColor = "#000";
+    ctx.shadowBlur = 7 * devicePixelRatio;
+
+    points.forEach(point => {
+      ctx.beginPath(); ctx.arc(point.x, point.y, 7 * devicePixelRatio, 0, Math.PI * 2); ctx.fill();
+    });
+
+    if (points.length === 2) {
+      ctx.beginPath(); ctx.moveTo(points[0].x, points[0].y); ctx.lineTo(points[1].x, points[1].y); ctx.stroke();
+      const label = Measurements.format(state.ui.opening, state.settings.precision);
+      const x = (points[0].x + points[1].x) / 2, y = (points[0].y + points[1].y) / 2;
+      ctx.font = `800 ${18 * devicePixelRatio}px system-ui`;
+      const width = ctx.measureText(label).width + 22 * devicePixelRatio;
+      ctx.shadowBlur = 0; ctx.fillStyle = "rgba(6,8,11,.86)";
+      ctx.beginPath(); ctx.roundRect(x - width / 2, y - 42 * devicePixelRatio, width, 32 * devicePixelRatio, 9 * devicePixelRatio); ctx.fill();
+      ctx.fillStyle = "#fff"; ctx.textAlign = "center"; ctx.fillText(label, x, y - 19 * devicePixelRatio);
+    }
+    ctx.restore();
+  }
+};
+
+const UI = {
+  toastTimer: null,
+
+  toast(message) {
+    const el = $("#toast"); el.textContent = message; el.classList.add("is-visible");
+    clearTimeout(this.toastTimer); this.toastTimer = setTimeout(() => el.classList.remove("is-visible"), 1200);
+  },
+
+  render(state) {
+    const precision = state.settings.precision;
+    const cut = Number.isFinite(state.ui.opening) ? state.ui.opening + state.ui.adjustment : null;
+
+    $("#jobLabel").textContent = state.settings.jobName || "Current job";
+    $("#listTitle").textContent = state.settings.jobName || "Current job";
+    $("#openingValue").textContent = Measurements.format(state.ui.opening, precision);
+    $("#cutValue").textContent = Measurements.format(cut, precision);
+    $("#allowanceValue").textContent = Measurements.formatAdjustment(state.ui.adjustment);
+
+    $("#measurementStatus").textContent =
+      state.ui.opening == null
+        ? (state.calibration.pixelsPerInch ? "Camera calibrated · mark two points" : "Calibrate camera, or enter an exact tape/laser measurement")
+        : (state.ui.source === "camera" ? "Camera measurement" : "Exact tape/laser measurement");
+
+    $("#guide").textContent = state.ui.calibrationMode
+      ? (state.ui.calibrationPoints.length ? "Card: right edge" : "Card: left edge")
+      : (state.ui.points.length ? "Mark second edge" : "Mark first edge");
+
+    $("#cutCount").textContent = `${state.cuts.length} cut${state.cuts.length === 1 ? "" : "s"}`;
+    $("#jobName").value = state.settings.jobName;
+    $("#precision").value = String(state.settings.precision);
+    $("#defaultAllowance").value = String(state.settings.defaultAllowance);
+
+    $$(".screen").forEach(el => el.classList.toggle("is-active", el.id === state.ui.screen));
+    $$(".bottom-nav button").forEach(el => el.classList.toggle("is-active", el.dataset.screen === state.ui.screen));
+
+    this.renderCutList(state);
+    Canvas.draw(state);
+  },
+
+  renderCutList(state) {
+    const root = $("#cutList");
+    root.replaceChildren();
+
+    state.cuts.forEach((cut, index) => {
+      const item = document.createElement("article");
+      item.className = "cut-item";
+
+      const check = document.createElement("button");
+      check.className = `check ${cut.done ? "is-done" : ""}`;
+      check.textContent = cut.done ? "✓" : "";
+      check.ariaLabel = cut.done ? "Mark uncut" : "Mark cut";
+      check.addEventListener("click", () => App.toggleCut(cut.id));
+
+      const body = document.createElement("div");
+      const title = document.createElement("strong");
+      title.textContent = `${cut.label || Measurements.alphaLabel(index)} · ${Measurements.format(cut.cut, state.settings.precision)}`;
+      body.append(title);
+      if (cut.name) {
+        const name = document.createElement("small"); name.style.color = "#fff"; name.style.fontWeight = "750"; name.textContent = cut.name; body.append(name);
+      }
+      const meta = document.createElement("small");
+      meta.textContent = `Opening ${Measurements.format(cut.opening, state.settings.precision)} · ${Measurements.formatAdjustment(cut.adjustment)}`;
+      body.append(meta);
+
+      const remove = document.createElement("button");
+      remove.className = "btn"; remove.textContent = "×"; remove.ariaLabel = "Delete cut";
+      remove.addEventListener("click", () => App.deleteCut(cut.id));
+
+      item.append(check, body, remove); root.append(item);
+    });
+  }
+};
+
+const App = {
+  init() {
+    Store.subscribe(state => UI.render(state));
+    this.bindEvents();
+    UI.render(Store.state);
+    addEventListener("resize", () => Canvas.resize());
+    addEventListener("pagehide", () => Camera.stop());
+    setTimeout(() => Canvas.resize(), 50);
+  },
+
+  bindEvents() {
+    $("#startButton").addEventListener("click", () => this.startCamera());
+    $("#markButton").addEventListener("click", () => this.markPoint());
+    $("#undoButton").addEventListener("click", () => this.undoPoint());
+    $("#flipButton").addEventListener("click", () => this.flipCamera());
+    $("#useExactButton").addEventListener("click", () => this.useExactMeasurement());
+    $("#saveNextButton").addEventListener("click", () => this.saveAndNext());
+    $("#clearListButton").addEventListener("click", () => this.clearCuts());
+
+    $$("[data-adjust]").forEach(button => button.addEventListener("click", () => {
+      Store.update(state => { state.ui.adjustment += Number(button.dataset.adjust); }, { persist: false });
+    }));
+
+    $$(".bottom-nav button").forEach(button => button.addEventListener("click", () => {
+      Store.update(state => { state.ui.screen = button.dataset.screen; }, { persist: false });
+      if (button.dataset.screen === "measureScreen") setTimeout(() => Canvas.resize(), 20);
+    }));
+
+    $("#jobName").addEventListener("input", event => Store.update(state => { state.settings.jobName = event.target.value; }));
+    $("#precision").addEventListener("change", event => Store.update(state => { state.settings.precision = Number(event.target.value); }));
+    $("#defaultAllowance").addEventListener("change", event => Store.update(state => {
+      state.settings.defaultAllowance = Number(event.target.value);
+      state.ui.adjustment = state.settings.defaultAllowance;
+    }));
+
+    $("#calibrateButton").addEventListener("click", () => this.beginCalibration());
+    $("#calibrationPointButton").addEventListener("click", () => this.markCalibrationPoint());
+    $("#cancelCalibrationButton").addEventListener("click", () => this.cancelCalibration());
+    $("#manualMeasurement").addEventListener("keydown", event => { if (event.key === "Enter") this.useExactMeasurement(); });
+  },
+
+  async startCamera() {
+    const button = $("#startButton");
+    button.disabled = true; button.textContent = "Opening camera…";
+    try {
+      await Camera.start();
+      $("#startScreen").classList.add("hidden");
+      Canvas.resize();
+    } catch {
+      button.disabled = false; button.textContent = "Try camera again";
+      $(".start__body p").textContent = "Camera could not open. Use the HTTPS site and allow camera permission.";
+    }
+  },
+
+  markPoint() {
+    const state = Store.state;
+    if (state.ui.calibrationMode) return;
+    Store.update(next => {
+      if (next.ui.points.length === 2) { next.ui.points = []; next.ui.opening = null; }
+      next.ui.points.push(Canvas.center());
+      if (next.ui.points.length === 2) {
+        const scale = next.calibration.pixelsPerInch;
+        next.ui.opening = scale ? Canvas.distance(next.ui.points[0], next.ui.points[1]) / scale : null;
+        next.ui.source = scale ? "camera" : null;
+        if (!scale) UI.toast("Calibrate first, or enter an exact measurement");
+      }
+    }, { persist: false });
+  },
+
+  undoPoint() {
+    Store.update(state => {
+      state.ui.points.pop();
+      if (state.ui.points.length < 2) { state.ui.opening = null; state.ui.source = null; }
+    }, { persist: false });
+  },
+
+  async flipCamera() {
+    try { await Camera.flip(); } catch { UI.toast("Could not switch camera"); }
+  },
+
+  useExactMeasurement() {
+    const value = Measurements.parse($("#manualMeasurement").value);
+    if (value == null) { UI.toast("Try 46 1/2 or 3ft 10 1/2"); return; }
+    Store.update(state => {
+      state.ui.opening = value; state.ui.source = "manual"; state.ui.points = [];
+    }, { persist: false });
+  },
+
+  saveAndNext() {
+    const state = Store.state;
+    if (!Number.isFinite(state.ui.opening)) { UI.toast("Measure or enter an opening first"); return; }
+
+    const name = $("#pieceName").value.trim();
+    Store.update(next => {
+      const opening = next.ui.opening, adjustment = next.ui.adjustment;
+      next.cuts.push({
+        id: crypto.randomUUID?.() || `${Date.now()}-${Math.random()}`,
+        label: Measurements.alphaLabel(next.cuts.length),
+        name, opening, adjustment, cut: opening + adjustment, done: false, createdAt: Date.now()
+      });
+      next.ui.points = []; next.ui.opening = null; next.ui.source = null;
+      next.ui.adjustment = next.settings.defaultAllowance;
+    });
+
+    $("#manualMeasurement").value = "";
+    $("#pieceName").value = "";
+    UI.toast("✓ Saved — measure next");
+  },
+
+  toggleCut(id) {
+    Store.update(state => {
+      const cut = state.cuts.find(item => item.id === id);
+      if (cut) cut.done = !cut.done;
+    });
+  },
+
+  deleteCut(id) { Store.update(state => { state.cuts = state.cuts.filter(item => item.id !== id); }); },
+
+  clearCuts() {
+    if (Store.state.cuts.length && confirm("Clear the whole cut list?")) Store.update(state => { state.cuts = []; });
+  },
+
+  beginCalibration() {
+    Store.update(state => {
+      state.ui.calibrationMode = true; state.ui.calibrationPoints = [];
+    }, { persist: false });
+    $("#calibrationHelp").innerHTML = "<b>1.</b> Aim the + at the left edge.";
+    $("#calibrationPointButton").textContent = "Mark left edge";
+    $("#calibrationSheet").classList.add("is-open");
+  },
+
+  markCalibrationPoint() {
+    Store.update(state => { state.ui.calibrationPoints.push(Canvas.center()); }, { persist: false });
+    if (Store.state.ui.calibrationPoints.length === 1) {
+      $("#calibrationHelp").innerHTML = "<b>2.</b> Move the + to the right edge.";
+      $("#calibrationPointButton").textContent = "Mark right edge";
+      return;
+    }
+
+    const [a, b] = Store.state.ui.calibrationPoints;
+    const pixelsPerInch = Canvas.distance(a, b) / CONFIG.referenceCardInches;
+    Store.update(state => {
+      state.calibration.pixelsPerInch = pixelsPerInch;
+      state.ui.calibrationMode = false; state.ui.calibrationPoints = [];
+      state.ui.points = []; state.ui.opening = null; state.ui.source = null;
+    });
+    $("#calibrationSheet").classList.remove("is-open");
+    UI.toast("Camera calibrated");
+  },
+
+  cancelCalibration() {
+    Store.update(state => { state.ui.calibrationMode = false; state.ui.calibrationPoints = []; }, { persist: false });
+    $("#calibrationSheet").classList.remove("is-open");
+  }
+};
+
+App.init();
+</script>
+</body>
+</html>
